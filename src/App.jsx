@@ -3,7 +3,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { Layout } from './components/layout/Layout';
 import Login from './pages/Login';
-import Signup from './pages/Signup';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import PMTAMonitor from './pages/tools/PMTAMonitor';
 import VMTADuplicate from './pages/tools/VMTADuplicate';
 import AuraRemover from './pages/tools/AuraRemover';
@@ -42,7 +43,10 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/tools/pmta-monitor" replace /> : <Login />} />
-      <Route path="/signup" element={user ? <Navigate to="/tools/pmta-monitor" replace /> : <Signup />} />
+
+      {/* Admin Routes */}
+      <Route path="/admin-login" element={<AdminLogin />} />
+      <Route path="/admin-panel" element={<AdminDashboard />} />
 
       <Route path="/tools" element={
         <ProtectedRoute>

@@ -1,21 +1,21 @@
 import mysql from 'mysql2/promise';
+import 'dotenv/config'; // Explicitly load .env for local dev
 
 let pool = null;
 
 export async function getConnection() {
     if (!pool) {
-        const dbUrl = process.env.DATABASE_URL;
+        if (!process.env.DATABASE_URL) {
+            console.error('FATAL: DATABASE_URL is undefined.');
+            throw new Error('DATABASE_URL is missing in environment variables');
+        }
 
-        // Parse the connection string
-        const url = new URL(dbUrl);
+        console.log('Connecting to DB with URI length:', process.env.DATABASE_URL.length);
 
         pool = mysql.createPool({
-            host: url.hostname,
-            port: parseInt(url.port) || 4000,
-            user: url.username,
-            password: url.password,
-            database: url.pathname.slice(1),
+            uri: process.env.DATABASE_URL,
             ssl: {
+                minVersion: 'TLSv1.2',
                 rejectUnauthorized: true
             },
             waitForConnections: true,

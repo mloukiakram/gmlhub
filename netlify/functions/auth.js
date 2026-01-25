@@ -80,53 +80,7 @@ export const handler = async (event) => {
             return sendResponse(200, null, true, 'Logged out');
         }
 
-        // POST /auth/register
-        if (event.httpMethod === 'POST' && path === '/register') {
-            const { username, password } = JSON.parse(event.body || '{}');
 
-            if (!username || !password) {
-                return sendResponse(400, null, false, 'Username and password required');
-            }
-
-            if (password.length < 4) {
-                return sendResponse(400, null, false, 'Password must be at least 4 characters');
-            }
-
-            const pool = await getConnection();
-
-            // Check if username exists
-            const [existing] = await pool.execute(
-                'SELECT id FROM auth_users WHERE username = ?',
-                [username]
-            );
-
-            if (existing.length > 0) {
-                return sendResponse(400, null, false, 'Username already exists');
-            }
-
-            // Hash password and create user
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const [result] = await pool.execute(
-                'INSERT INTO auth_users (username, password, role) VALUES (?, ?, ?)',
-                [username, hashedPassword, 'user']
-            );
-
-            // Auto-login after registration
-            const token = createToken({
-                userId: result.insertId,
-                username: username,
-                role: 'user'
-            });
-
-            return sendResponse(201, {
-                token,
-                user: {
-                    id: result.insertId,
-                    username: username,
-                    role: 'user'
-                }
-            }, true, 'Registration successful');
-        }
 
         return sendResponse(404, null, false, 'Not found');
 

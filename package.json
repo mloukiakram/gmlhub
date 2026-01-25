@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "netlify dev",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -14,6 +15,7 @@
     "@tanstack/react-query-devtools": "^5.91.2",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.3",
     "framer-motion": "^12.29.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.563.0",
