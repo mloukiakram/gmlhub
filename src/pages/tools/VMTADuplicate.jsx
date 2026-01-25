@@ -290,7 +290,7 @@ export default function VMTADuplicate() {
                                     </label>
                                 </div>
                             </div>
-                            <Button size="lg" onClick={generate} className="bg-slate-900 text-white hover:bg-slate-800 h-10 px-8">
+                            <Button size="lg" onClick={generate} className="h-10 px-8">
                                 Generate
                             </Button>
                         </div>

@@ -260,7 +260,7 @@ export default function BounceCleaner() {
                         <Button
                             icon={Trash2}
                             onClick={processDomains}
-                            className="w-full bg-slate-900 hover:bg-slate-800 text-white border-0 py-3 shadow-sm"
+                            className="w-full shadow-sm"
                         >
                             Clean Domains & Save
                         </Button>
@@ -288,7 +288,7 @@ export default function BounceCleaner() {
                             <input type="file" accept=".json" onChange={handleImport} className="hidden" id="import-file" />
                             <Button variant="outline" size="sm" icon={Upload} onClick={() => document.getElementById('import-file').click()} className="border-base">Import</Button>
                             <Button variant="outline" size="sm" icon={Download} onClick={handleExport} className="border-base">Export</Button>
-                            <Button size="sm" icon={Plus} onClick={() => openServerModal()} className="bg-slate-900 text-white hover:bg-slate-800">Add Server</Button>
+                            <Button size="sm" icon={Plus} onClick={() => openServerModal()}>Add Server</Button>
                         </div>
                     </div>
 

@@ -349,9 +349,7 @@ export default function AuraRemover() {
                                 </div>
                                 <Button
                                     onClick={processAndShow}
-                                    className={`flex-1 shadow-sm border-0 text-white font-bold tracking-wide
-                                        ${mode === 'delete' ? 'bg-slate-900 hover:bg-slate-800' : 'bg-slate-900 hover:bg-slate-800'}
-                                    `}
+                                    className="flex-1 shadow-sm font-bold tracking-wide"
                                     icon={ArrowRight}
                                     iconPosition="right"
                                 >
@@ -417,7 +415,7 @@ export default function AuraRemover() {
                             <Button size="sm" icon={Plus} onClick={() => {
                                 setListForm({ name: '', content: '' });
                                 setListModal({ open: true, list: null });
-                            }} className="bg-slate-900 text-white hover:bg-slate-800">New List</Button>
+                            }}>New List</Button>
                         </div>
                     </div>
 

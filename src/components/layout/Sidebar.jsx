@@ -81,7 +81,11 @@ export function Sidebar() {
                         >
                             {({ isActive }) => (
                                 <>
-                                    {/* Icon removed per user request */}
+                                    {/* Icon shown only when collapsed */}
+                                    {collapsed && (
+                                        <item.icon size={20} className={isActive ? 'text-blue-600 dark:text-blue-400' : 'text-secondary'} />
+                                    )}
+                                    {/* Label shown only when expanded */}
                                     {!collapsed && (
                                         <span className="text-sm truncate pl-1">{item.label}</span>
                                     )}
