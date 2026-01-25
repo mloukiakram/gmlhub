@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import {
     Copy,
     Sparkles,
@@ -10,7 +11,9 @@ import {
     ChevronLeft,
     ChevronRight,
     LogOut,
-    Menu
+    Menu,
+    Sun,
+    Moon
 } from 'lucide-react';
 
 const navItems = [
@@ -24,6 +27,7 @@ const navItems = [
 export function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
     const { logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -34,50 +38,55 @@ export function Sidebar() {
     return (
         <aside
             className={`
-                h-screen bg-white border-r border-[#e8ecf0] flex flex-col
-                transition-all duration-300 ease-out
-                ${collapsed ? 'w-[72px]' : 'w-[240px]'}
+                h-screen border-r flex flex-col
+                transition-all duration-300 ease-in-out
+                bg-white border-slate-200
+                dark:bg-[#0f172a] dark:border-slate-800
+                ${collapsed ? 'w-[72px]' : 'w-[260px]'}
             `}
-            style={{ boxShadow: '1px 0 0 rgba(0,0,0,0.02)' }}
         >
             {/* Header */}
-            <div className={`h-16 flex items-center border-b border-[#e8ecf0] ${collapsed ? 'justify-center px-0' : 'px-5'}`}>
+            <div className={`h-16 flex items-center border-b border-slate-200 dark:border-slate-800 ${collapsed ? 'justify-center px-0' : 'px-5'}`}>
                 {!collapsed && (
                     <div className="flex items-center gap-3 animate-fade-in">
-                        <div className="w-9 h-9 rounded-xl bg-[#2563eb] flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
                             <Menu size={18} className="text-white" />
                         </div>
-                        <span className="font-semibold text-[#1a1d21] text-[15px]">GML Tools</span>
+                        <span className="font-bold text-slate-900 dark:text-white text-[16px] tracking-tight">GML Panel</span>
                     </div>
                 )}
                 {collapsed && (
-                    <div className="w-9 h-9 rounded-xl bg-[#2563eb] flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
                         <Menu size={18} className="text-white" />
                     </div>
                 )}
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 py-4 px-3 overflow-y-auto">
+            <nav className="flex-1 py-6 px-3 overflow-y-auto">
                 <div className="space-y-1">
                     {navItems.map((item, index) => (
                         <NavLink
                             key={item.path}
                             to={`/tools/${item.path}`}
                             className={({ isActive }) => `
-                                sidebar-link flex items-center gap-3 h-11 rounded-lg
-                                transition-all duration-150
+                                flex items-center gap-3 h-11 rounded-lg mb-1
+                                transition-all duration-200 font-medium
                                 ${collapsed ? 'justify-center px-0' : 'px-3'}
                                 ${isActive
-                                    ? 'bg-[#eff6ff] text-[#2563eb] active'
-                                    : 'text-[#5e6674] hover:bg-[#f8f9fa] hover:text-[#1a1d21]'
+                                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+                                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
                                 }
                             `}
                             style={{ animationDelay: `${index * 50}ms` }}
                         >
-                            <item.icon size={20} strokeWidth={1.75} />
-                            {!collapsed && (
-                                <span className="text-sm font-medium truncate">{item.label}</span>
+                            {({ isActive }) => (
+                                <>
+                                    {/* Icon removed per user request */}
+                                    {!collapsed && (
+                                        <span className="text-sm truncate pl-1">{item.label}</span>
+                                    )}
+                                </>
                             )}
                         </NavLink>
                     ))}
@@ -85,14 +94,30 @@ export function Sidebar() {
             </nav>
 
             {/* Footer */}
-            <div className="border-t border-[#e8ecf0] p-3 space-y-1">
+            <div className="border-t border-slate-200 dark:border-slate-800 p-3 space-y-1">
+                {/* Theme Toggle */}
+                <button
+                    onClick={toggleTheme}
+                    className={`
+                        w-full h-10 rounded-lg flex items-center gap-3
+                        text-slate-500 hover:bg-slate-50 hover:text-slate-900
+                        dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white
+                        transition-all duration-200
+                        ${collapsed ? 'justify-center px-0' : 'px-3'}
+                    `}
+                >
+                    {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+                    {!collapsed && <span className="text-sm font-medium">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>}
+                </button>
+
                 {/* Collapse Toggle */}
                 <button
                     onClick={() => setCollapsed(!collapsed)}
                     className={`
                         w-full h-10 rounded-lg flex items-center gap-3
-                        text-[#5e6674] hover:bg-[#f8f9fa] hover:text-[#1a1d21]
-                        transition-all duration-150
+                        text-slate-500 hover:bg-slate-50 hover:text-slate-900
+                        dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white
+                        transition-all duration-200
                         ${collapsed ? 'justify-center px-0' : 'px-3'}
                     `}
                 >
@@ -105,8 +130,9 @@ export function Sidebar() {
                     onClick={handleLogout}
                     className={`
                         w-full h-10 rounded-lg flex items-center gap-3
-                        text-[#5e6674] hover:bg-[#fef2f2] hover:text-[#ef4444]
-                        transition-all duration-150
+                        text-slate-500 hover:bg-red-50 hover:text-red-600
+                        dark:text-slate-400 dark:hover:bg-red-500/10 dark:hover:text-red-400
+                        transition-all duration-200
                         ${collapsed ? 'justify-center px-0' : 'px-3'}
                     `}
                 >
@@ -117,8 +143,8 @@ export function Sidebar() {
 
             {/* Version */}
             {!collapsed && (
-                <div className="px-5 py-3 text-xs text-[#9ca3af]">
-                    Version 4.0
+                <div className="px-5 py-3 text-[10px] font-mono text-slate-400 dark:text-slate-600 uppercase tracking-widest text-center">
+                    v4.1.0 PREMIUM
                 </div>
             )}
         </aside>

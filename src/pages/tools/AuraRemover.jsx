@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Button, Modal, ConfirmModal, Badge } from '../../components/ui';
 import {
-    Trash2, Check, RefreshCw, Plus, Upload, Download, Undo2, Copy,
-    FileText, Edit, X
+    Trash2, Check, Plus, Upload, Download, Undo2, Copy, Trash, Filter, RefreshCw,
+    Database, Search, Edit, ArrowRight
 } from 'lucide-react';
 
 const STORAGE_KEY = 'auraLineProcessor_v1';
@@ -23,14 +24,17 @@ export default function AuraRemover() {
     const [lastActionState, setLastActionState] = useState(null);
 
     // Modals
+    const [libraryModal, setLibraryModal] = useState(false);
     const [listModal, setListModal] = useState({ open: false, list: null });
     const [deleteConfirm, setDeleteConfirm] = useState({ open: false, listId: null });
     const [vmtaModal, setVmtaModal] = useState({ open: false, vmtas: [], filterData: [] });
 
+    // Search state for library
+    const [librarySearch, setLibrarySearch] = useState('');
+
     // Form for list modal
     const [listForm, setListForm] = useState({ name: '', content: '' });
 
-    // Load saved lists from localStorage
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
@@ -38,52 +42,41 @@ export default function AuraRemover() {
         }
     }, []);
 
-    // Save lists to localStorage
     const saveListsToStorage = (lists) => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(lists));
         setSavedLists(lists);
     };
 
-    // Parse filter data
+    const filteredLists = savedLists.filter(l =>
+        l.name.toLowerCase().includes(librarySearch.toLowerCase())
+    );
+
     const parseFilterData = () => {
         const rawText = filterData;
-
         if (filterBy === 'keyword') {
             return {
                 type: 'keyword',
                 data: rawText.split('\n').map(k => k.trim().toLowerCase()).filter(Boolean)
             };
         }
-
         const cleanedText = rawText.replace(/,/g, '\n');
         const lines = cleanedText.split('\n');
         const parsedData = [];
-
         const vmtaRegex = /^\d+(?:\.\d+){3}-([a-zA-Z0-9]+)-.*-(\d+)$/;
 
         lines.forEach(line => {
             const trimmed = line.trim();
             if (!trimmed) return;
-
             const match = trimmed.match(vmtaRegex);
             if (match) {
-                parsedData.push({
-                    line: parseInt(match[2], 10),
-                    vmta: match[1].toLowerCase()
-                });
+                parsedData.push({ line: parseInt(match[2], 10), vmta: match[1].toLowerCase() });
             } else if (/^\d+$/.test(trimmed)) {
-                parsedData.push({
-                    line: parseInt(trimmed, 10),
-                    vmta: null
-                });
+                parsedData.push({ line: parseInt(trimmed, 10), vmta: null });
             } else {
                 const parts = trimmed.split(/[\s-]+/);
                 const lastPart = parts[parts.length - 1];
                 if (/^\d+$/.test(lastPart)) {
-                    parsedData.push({
-                        line: parseInt(lastPart, 10),
-                        vmta: null
-                    });
+                    parsedData.push({ line: parseInt(lastPart, 10), vmta: null });
                 }
             }
         });
@@ -95,13 +88,11 @@ export default function AuraRemover() {
         };
     };
 
-    // Execute processing
     const executeProcessing = (selectedVmta, filterDataArray, filterType) => {
         const sourceLines = sourceList.split('\n');
         const resultLines = [];
         const logDetails = [];
 
-        // Save undo state
         if (currentLoadedListId) {
             const listIndex = savedLists.findIndex(l => l.id === currentLoadedListId);
             if (listIndex > -1) {
@@ -160,66 +151,31 @@ export default function AuraRemover() {
         }
 
         setResult(finalContent);
+        let filterDesc = filterType === 'keyword' ? `${keywordFilterArray.length} keyword(s)` : `${numberFilterSet.size} line number(s)`;
+        if (selectedVmta && selectedVmta !== 'null') filterDesc += ` for VMTA "${selectedVmta}"`;
 
-        let filterDesc = "";
-        if (filterType === 'keyword') {
-            filterDesc = `${keywordFilterArray.length} keyword(s)`;
-        } else {
-            filterDesc = `${numberFilterSet.size} line number(s)`;
-            if (selectedVmta && selectedVmta !== 'null') {
-                filterDesc += ` for VMTA "${selectedVmta}"`;
-            }
-        }
-
-        setLog([
-            `--- PROCESSING SUMMARY ---`,
-            `Action: ${mode.toUpperCase()} lines based on ${filterDesc}.`,
-            `Lines Kept: ${resultLines.length}`,
-            `Lines Removed: ${sourceLines.length - resultLines.length}`,
-            updateMessage,
-            `\n--- DETAILED LOG ---`,
-            ...logDetails
-        ].join('\n').trim());
+        setLog([`--- PROCESSING SUMMARY ---`, `Action: ${mode.toUpperCase()} lines based on ${filterDesc}.`, `Lines Kept: ${resultLines.length}`, `Lines Removed: ${sourceLines.length - resultLines.length}`, updateMessage, `\n--- DETAILED LOG ---`, ...logDetails].join('\n').trim());
     };
 
-    // Process button handler
     const processAndShow = () => {
         const parsedResult = parseFilterData();
+        if (parsedResult.type === 'keyword' && parsedResult.data.length === 0) return alert("Filter data is empty.");
+        if (parsedResult.data.length === 0) return alert("Filter data is empty.");
 
-        if (parsedResult.type === 'keyword') {
-            if (parsedResult.data.length === 0) {
-                alert("Filter data is empty. Nothing to process.");
-                return;
-            }
-            executeProcessing(null, parsedResult.data, 'keyword');
-            return;
-        }
+        if (parsedResult.type === 'keyword') return executeProcessing(null, parsedResult.data, 'keyword');
 
         const filterDataParsed = parsedResult.data;
-        if (filterDataParsed.length === 0) {
-            alert("Filter data is empty. Nothing to process.");
-            return;
-        }
-
         const vmtas = new Set(filterDataParsed.map(item => item.vmta).filter(vmta => vmta !== null));
         const uniqueVmtas = Array.from(vmtas);
         const hasNullVmta = filterDataParsed.some(item => item.vmta === null);
-        const totalOptionGroups = uniqueVmtas.length + (hasNullVmta ? 1 : 0);
 
-        if (totalOptionGroups > 1) {
+        if (uniqueVmtas.length + (hasNullVmta ? 1 : 0) > 1) {
             setVmtaModal({ open: true, vmtas: uniqueVmtas, hasNullVmta, filterData: filterDataParsed });
         } else {
-            let selectedVmta = null;
-            if (uniqueVmtas.length === 1) {
-                selectedVmta = uniqueVmtas[0];
-            } else if (hasNullVmta) {
-                selectedVmta = 'null';
-            }
-            executeProcessing(selectedVmta, filterDataParsed, 'number');
+            executeProcessing(uniqueVmtas.length === 1 ? uniqueVmtas[0] : (hasNullVmta ? 'null' : null), filterDataParsed, 'number');
         }
     };
 
-    // Undo
     const handleUndo = () => {
         if (!lastActionState) return;
         const listIndex = savedLists.findIndex(l => l.id === lastActionState.listId);
@@ -227,70 +183,37 @@ export default function AuraRemover() {
             const updatedLists = [...savedLists];
             updatedLists[listIndex].content = lastActionState.previousContent;
             saveListsToStorage(updatedLists);
-            if (currentLoadedListId === lastActionState.listId) {
-                setSourceList(lastActionState.previousContent);
-            }
+            if (currentLoadedListId === lastActionState.listId) setSourceList(lastActionState.previousContent);
         }
         setLastActionState(null);
     };
 
-    // List CRUD
-    const openListModal = (list = null) => {
-        if (list) {
-            setListForm({ name: list.name, content: list.content });
-        } else {
-            setListForm({ name: '', content: '' });
-        }
-        setListModal({ open: true, list });
-    };
-
     const handleSaveList = () => {
-        if (!listForm.name.trim()) {
-            alert('List name is required');
-            return;
-        }
-
-        let updatedLists;
-        if (listModal.list) {
-            updatedLists = savedLists.map(l =>
-                l.id === listModal.list.id ? { ...l, ...listForm } : l
-            );
-        } else {
-            updatedLists = [...savedLists, { id: Date.now(), ...listForm }];
-        }
+        if (!listForm.name.trim()) return alert('List name is required');
+        const updatedLists = listModal.list
+            ? savedLists.map(l => l.id === listModal.list.id ? { ...l, ...listForm } : l)
+            : [...savedLists, { id: Date.now(), ...listForm }];
         saveListsToStorage(updatedLists);
         setListModal({ open: false, list: null });
     };
 
     const handleDeleteList = () => {
-        const updatedLists = savedLists.filter(l => l.id !== deleteConfirm.listId);
-        saveListsToStorage(updatedLists);
-        if (currentLoadedListId === deleteConfirm.listId) {
-            setCurrentLoadedListId(null);
-            setSourceList('');
-        }
+        saveListsToStorage(savedLists.filter(l => l.id !== deleteConfirm.listId));
+        if (currentLoadedListId === deleteConfirm.listId) { setCurrentLoadedListId(null); setSourceList(''); }
         setDeleteConfirm({ open: false, listId: null });
     };
 
     const loadList = (list) => {
         setSourceList(list.content);
         setCurrentLoadedListId(list.id);
+        setLibraryModal(false);
     };
 
-    // Import/Export
-    const handleExport = () => {
-        if (savedLists.length === 0) {
-            alert('No saved lists to export.');
-            return;
-        }
-        const dataStr = JSON.stringify(savedLists, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `aura-processor-backup-${new Date().toISOString().slice(0, 10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+    const copyResult = async () => {
+        if (!result) return;
+        await navigator.clipboard.writeText(result);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     const handleImport = (event) => {
@@ -300,292 +223,311 @@ export default function AuraRemover() {
         reader.onload = (e) => {
             try {
                 const imported = JSON.parse(e.target.result);
-                if (Array.isArray(imported) && confirm('Importing will overwrite existing lists. Are you sure?')) {
-                    saveListsToStorage(imported);
-                }
-            } catch {
-                alert('Import failed. Invalid file format.');
-            }
+                if (Array.isArray(imported) && confirm('Importing will overwrite existing lists. Are you sure?')) saveListsToStorage(imported);
+            } catch { alert('Import failed.'); }
         };
         reader.readAsText(file);
         event.target.value = '';
     };
 
-    // Copy result
-    const copyResult = async () => {
-        if (!result) return;
-        await navigator.clipboard.writeText(result);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+    const handleExport = () => {
+        if (savedLists.length === 0) return alert('No data to export.');
+        const blob = new Blob([JSON.stringify(savedLists, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `aura-processor-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(url);
     };
 
-    const getSourceLineCount = () => sourceList.split('\n').filter(Boolean).length;
-    const getFilterLineCount = () => filterData.split('\n').filter(Boolean).length;
-
     return (
-        <div className="h-full flex flex-col">
+        <div className="h-full flex flex-col bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-300">
             {/* Header */}
-            <div className="px-8 py-6 border-b border-[#e8ecf0] bg-white">
-                <h1 className="text-xl font-semibold text-[#1a1d21]">Lines Processor</h1>
-                <p className="text-sm text-[#5e6674] mt-0.5">
-                    Process lines by deleting or keeping based on line numbers or keywords
-                </p>
+            <div className="px-6 py-4 border-b border-slate-300 dark:border-slate-800 bg-white dark:bg-[#0f172a] transition-colors flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-3">
+                    <div>
+                        <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Lines Processor</h1>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                            Professional Line Management
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        icon={Database}
+                        onClick={() => setLibraryModal(true)}
+                        className="bg-white hover:bg-slate-50 border-slate-300 dark:border-slate-700 dark:bg-slate-900"
+                    >
+                        List Library
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        icon={Undo2}
+                        disabled={!lastActionState}
+                        onClick={handleUndo}
+                        className="bg-white hover:bg-slate-50 border-slate-300 dark:border-slate-700 dark:bg-slate-900"
+                    >
+                        Undo Last
+                    </Button>
+                </div>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-8 bg-[#fafbfc]">
-                <div className="max-w-6xl mx-auto space-y-6">
-                    {/* Controls */}
-                    <Card>
-                        <div className="flex flex-wrap items-center justify-between gap-4">
-                            <div className="flex items-center gap-6">
-                                {/* Mode Toggle */}
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-[#5e6674]">Mode</span>
-                                    <div className="flex bg-[#f3f4f6] rounded-lg p-1">
-                                        <button
-                                            onClick={() => setMode('delete')}
-                                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${mode === 'delete'
-                                                    ? 'bg-white text-[#ef4444] shadow-sm'
-                                                    : 'text-[#6b7280] hover:text-[#374151]'
-                                                }`}
-                                        >
-                                            Delete
-                                        </button>
-                                        <button
-                                            onClick={() => setMode('keep')}
-                                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${mode === 'keep'
-                                                    ? 'bg-white text-[#2563eb] shadow-sm'
-                                                    : 'text-[#6b7280] hover:text-[#374151]'
-                                                }`}
-                                        >
-                                            Keep
-                                        </button>
-                                    </div>
-                                </div>
+            {/* Content - MODERN SPLIT LAYOUT */}
+            <div className="flex-1 overflow-hidden p-6 flex flex-col md:flex-row gap-6">
 
-                                {/* Filter Toggle */}
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-[#5e6674]">Filter</span>
-                                    <div className="flex bg-[#f3f4f6] rounded-lg p-1">
-                                        <button
-                                            onClick={() => setFilterBy('number')}
-                                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${filterBy === 'number'
-                                                    ? 'bg-white text-[#1a1d21] shadow-sm'
-                                                    : 'text-[#6b7280] hover:text-[#374151]'
-                                                }`}
-                                        >
-                                            Line Number
-                                        </button>
-                                        <button
-                                            onClick={() => setFilterBy('keyword')}
-                                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${filterBy === 'keyword'
-                                                    ? 'bg-white text-[#1a1d21] shadow-sm'
-                                                    : 'text-[#6b7280] hover:text-[#374151]'
-                                                }`}
-                                        >
-                                            Keyword
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                {/* LEFT PANEL: INPUTS & CONTROLS */}
+                <div className="flex-1 flex flex-col gap-6 min-w-0">
 
-                            <Button
-                                variant="secondary"
-                                icon={Undo2}
-                                disabled={!lastActionState}
-                                onClick={handleUndo}
-                            >
-                                Undo
-                            </Button>
+                    {/* Source List */}
+                    <div className="flex-[3] flex flex-col bg-white dark:bg-[#0f172a] rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden relative group transition-all hover:border-slate-400 dark:hover:border-slate-600">
+                        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                1. Source List
+                            </label>
+                            <Badge variant="neutral" className="font-mono text-[10px]">
+                                {sourceList.split('\n').filter(Boolean).length} lines
+                            </Badge>
                         </div>
-                    </Card>
+                        <textarea
+                            value={sourceList}
+                            onChange={(e) => {
+                                setSourceList(e.target.value);
+                                if (currentLoadedListId) setCurrentLoadedListId(null);
+                            }}
+                            className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-slate-900 dark:text-slate-200 resize-none focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-700"
+                            spellCheck={false}
+                        />
+                    </div>
 
-                    {/* Saved Lists */}
-                    <Card>
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-[#1a1d21]">Saved Lists</h3>
-                            <div className="flex gap-2">
-                                <input
-                                    type="file"
-                                    accept=".json"
-                                    onChange={handleImport}
-                                    className="hidden"
-                                    id="import-file"
-                                />
-                                <Button variant="outline" size="sm" icon={Upload} onClick={() => document.getElementById('import-file').click()}>
-                                    Import
-                                </Button>
-                                <Button variant="outline" size="sm" icon={Download} onClick={handleExport}>
-                                    Export
-                                </Button>
-                                <Button size="sm" icon={Plus} onClick={() => openListModal()}>
-                                    Add New List
-                                </Button>
+                    {/* Filter & Actions */}
+                    <div className="flex-[2] flex flex-col bg-white dark:bg-[#0f172a] rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden relative hover:border-slate-400 dark:hover:border-slate-600 transition-all">
+                        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                2. Filter Configuration
+                            </label>
+                            <div className="flex bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-0.5 shadow-sm">
+                                <button
+                                    onClick={() => setFilterBy('number')}
+                                    className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${filterBy === 'number' ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    Number
+                                </button>
+                                <button
+                                    onClick={() => setFilterBy('keyword')}
+                                    className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${filterBy === 'keyword' ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    Keyword
+                                </button>
                             </div>
                         </div>
-
-                        {savedLists.length === 0 ? (
-                            <p className="text-sm text-[#6b7280] text-center py-6">
-                                No saved lists. Add one to get started.
-                            </p>
-                        ) : (
-                            <div className="border border-[#e8ecf0] rounded-lg overflow-hidden">
-                                <table className="w-full">
-                                    <thead className="bg-[#f9fafb]">
-                                        <tr>
-                                            <th className="px-4 py-2.5 text-left text-xs font-medium text-[#5e6674] uppercase">Name</th>
-                                            <th className="px-4 py-2.5 text-left text-xs font-medium text-[#5e6674] uppercase">Lines</th>
-                                            <th className="px-4 py-2.5 text-right text-xs font-medium text-[#5e6674] uppercase">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {savedLists.map(list => (
-                                            <tr
-                                                key={list.id}
-                                                className={`border-t border-[#f3f4f6] hover:bg-[#f9fafb] ${currentLoadedListId === list.id ? 'bg-[#eff6ff]' : ''
-                                                    }`}
-                                            >
-                                                <td className="px-4 py-3 text-sm text-[#1a1d21]">{list.name}</td>
-                                                <td className="px-4 py-3 text-sm text-[#6b7280]">
-                                                    {list.content.split('\n').filter(Boolean).length}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="flex gap-2 justify-end">
-                                                        <Button variant="primary" size="sm" onClick={() => loadList(list)}>Load</Button>
-                                                        <Button variant="outline" size="sm" onClick={() => openListModal(list)}>Edit</Button>
-                                                        <Button variant="outline" size="sm" onClick={() => setDeleteConfirm({ open: true, listId: list.id })}>
-                                                            <Trash2 size={14} />
-                                                        </Button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </Card>
-
-                    {/* Input/Output Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Source List */}
-                        <Card>
-                            <div className="flex items-center justify-between mb-3">
-                                <label className="text-sm font-medium text-[#374151]">1. Source List</label>
-                                <span className="text-xs text-[#9ca3af]">{getSourceLineCount()} lines</span>
-                            </div>
-                            <textarea
-                                value={sourceList}
-                                onChange={(e) => {
-                                    setSourceList(e.target.value);
-                                    if (currentLoadedListId) setCurrentLoadedListId(null);
-                                }}
-                                placeholder="Paste your source list here..."
-                                className="w-full h-64 px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm font-mono resize-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/10 outline-none"
-                            />
-                        </Card>
-
-                        {/* Filter Data */}
-                        <Card>
-                            <div className="flex items-center justify-between mb-3">
-                                <label className="text-sm font-medium text-[#374151]">
-                                    2. {filterBy === 'number' ? 'Line Numbers' : 'Keywords'} to Process
-                                </label>
-                                <span className="text-xs text-[#9ca3af]">{getFilterLineCount()} lines</span>
-                            </div>
+                        <div className="flex-1 relative flex flex-col">
                             <textarea
                                 value={filterData}
                                 onChange={(e) => setFilterData(e.target.value)}
-                                placeholder={filterBy === 'number'
-                                    ? "1\n5\n10\nor\n192.168.1.1-gmail-foo-42"
-                                    : "keyword1\nkeyword2"
-                                }
-                                className="w-full h-64 px-4 py-3 border border-[#e5e7eb] rounded-xl text-sm font-mono resize-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/10 outline-none"
+                                className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-slate-900 dark:text-slate-200 resize-none focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-700 mb-16"
+                                spellCheck={false}
                             />
-                        </Card>
-                    </div>
-
-                    {/* Process Button */}
-                    <div className="flex justify-center">
-                        <Button
-                            variant={mode === 'delete' ? 'danger' : 'primary'}
-                            size="lg"
-                            icon={mode === 'delete' ? Trash2 : Check}
-                            onClick={processAndShow}
-                            className="min-w-[300px]"
-                        >
-                            {mode === 'delete' ? 'Delete' : 'Keep'} Lines
-                            {currentLoadedListId && ' & Update List'}
-                        </Button>
-                    </div>
-
-                    {/* Results */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <Card>
-                            <div className="flex items-center justify-between mb-3">
-                                <label className="text-sm font-medium text-[#374151]">3. Final Result</label>
-                                <Button variant="outline" size="sm" icon={copied ? Check : Copy} onClick={copyResult}>
-                                    {copied ? 'Copied!' : 'Copy'}
+                            {/* Action Bar Integrated at Bottom of Filter */}
+                            <div className="absolute bottom-4 left-4 right-4 flex gap-3">
+                                <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+                                    <button
+                                        onClick={() => setMode('delete')}
+                                        className={`px-3 py-2 rounded-md flex items-center justify-center transition-all ${mode === 'delete' ? 'bg-white dark:bg-slate-800 text-red-600 shadow-sm font-bold' : 'text-slate-400'}`}
+                                        title="Delete Mode"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => setMode('keep')}
+                                        className={`px-3 py-2 rounded-md flex items-center justify-center transition-all ${mode === 'keep' ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-sm font-bold' : 'text-slate-400'}`}
+                                        title="Keep Mode"
+                                    >
+                                        <Check size={16} />
+                                    </button>
+                                </div>
+                                <Button
+                                    onClick={processAndShow}
+                                    className={`flex-1 shadow-sm border-0 text-white font-bold tracking-wide
+                                        ${mode === 'delete' ? 'bg-slate-900 hover:bg-slate-800' : 'bg-slate-900 hover:bg-slate-800'}
+                                    `}
+                                    icon={ArrowRight}
+                                    iconPosition="right"
+                                >
+                                    {mode === 'delete' ? 'Delete Lines' : 'Keep Lines'}
+                                    {currentLoadedListId && <span className="ml-1 opacity-70 font-normal text-xs">(Update)</span>}
                                 </Button>
                             </div>
-                            <textarea
-                                value={result}
-                                readOnly
-                                className="w-full h-64 px-4 py-3 bg-[#1a1d21] text-[#10b981] rounded-xl text-sm font-mono resize-none outline-none"
-                            />
-                        </Card>
+                        </div>
+                    </div>
+                </div>
 
-                        <Card>
-                            <label className="block text-sm font-medium text-[#374151] mb-3">4. Processing Log</label>
-                            <textarea
-                                value={log}
-                                readOnly
-                                className="w-full h-64 px-4 py-3 bg-[#f9fafb] border border-[#e8ecf0] rounded-xl text-sm font-mono resize-none outline-none text-[#5e6674]"
-                            />
-                        </Card>
+                {/* RIGHT PANEL: OUTPUT */}
+                <div className="flex-1 flex flex-col bg-white dark:bg-[#0f172a] rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden min-w-0">
+                    <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            3. Result Output
+                        </label>
+                        <button
+                            onClick={copyResult}
+                            className={`p-1.5 rounded-md transition-all ${copied ? 'bg-green-100 text-green-600 dark:bg-green-900/30' : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300'}`}
+                            title="Copy Result"
+                        >
+                            {copied ? <Check size={16} /> : <Copy size={16} />}
+                        </button>
+                    </div>
+                    <textarea
+                        value={result}
+                        readOnly
+                        className="flex-1 w-full p-4 bg-[#f8fafc] dark:bg-[#1a1d21] text-slate-700 dark:text-slate-300 text-sm font-mono resize-none focus:outline-none"
+                    />
+                    <div className="h-40 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden flex flex-col">
+                        <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50">Processing Log</div>
+                        <textarea
+                            value={log}
+                            readOnly
+                            className="flex-1 w-full p-3 bg-transparent text-xs font-mono text-slate-600 dark:text-slate-400 resize-none focus:outline-none"
+                        />
                     </div>
                 </div>
             </div>
 
-            {/* List Modal */}
+            {/* List Library Modal */}
+            <Modal
+                isOpen={libraryModal}
+                onClose={() => setLibraryModal(false)}
+                title="Saved Lists Library"
+                size="xl"
+            >
+                <div className="h-[500px] flex flex-col">
+                    <div className="flex items-center justify-between mb-4">
+                        <input
+                            type="text"
+                            placeholder="Search saved lists..."
+                            value={librarySearch}
+                            onChange={(e) => setLibrarySearch(e.target.value)}
+                            className="w-64 h-9 px-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-sm outline-none focus:border-slate-500"
+                        />
+                        <div className="flex gap-2">
+                            <input type="file" accept=".json" onChange={handleImport} className="hidden" id="import-file" />
+                            <Button variant="outline" size="sm" icon={Upload} onClick={() => document.getElementById('import-file').click()}>Import</Button>
+                            <Button variant="outline" size="sm" icon={Download} onClick={handleExport}>Export</Button>
+                            <Button size="sm" icon={Plus} onClick={() => {
+                                setListForm({ name: '', content: '' });
+                                setListModal({ open: true, list: null });
+                            }} className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900">New List</Button>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-auto border border-slate-300 dark:border-slate-700 rounded-lg">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-100 dark:bg-slate-800 sticky top-0 z-10 border-b border-slate-300 dark:border-slate-700">
+                                <tr>
+                                    <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">List Name</th>
+                                    <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Line Count</th>
+                                    <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                                {filteredLists.map(list => (
+                                    <tr key={list.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 group">
+                                        <td className="px-4 py-2.5 font-medium text-slate-900 dark:text-white">
+                                            {list.name}
+                                            {currentLoadedListId === list.id && <span className="ml-2 text-xs text-slate-500">(Active)</span>}
+                                        </td>
+                                        <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{list.content.split('\n').filter(Boolean).length}</td>
+                                        <td className="px-4 py-2.5 text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <Button size="xs" variant="outline" onClick={() => loadList(list)} className="border-slate-300">Load</Button>
+                                                <Button variant="outline" size="xs" icon={Edit} onClick={() => {
+                                                    setListForm({ name: list.name, content: list.content });
+                                                    setListModal({ open: true, list });
+                                                }} className="border-slate-300" />
+                                                <Button variant="outline" size="xs" icon={Trash2} className="text-slate-500 hover:text-slate-700 border-slate-300" onClick={() => setDeleteConfirm({ open: true, listId: list.id })} />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {filteredLists.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-slate-500">No lists found</td></tr>}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* List Form Modal */}
             <Modal
                 isOpen={listModal.open}
                 onClose={() => setListModal({ open: false, list: null })}
                 title={listModal.list ? 'Edit List' : 'Add New List'}
             >
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-xs font-medium text-[#5e6674] uppercase tracking-wide mb-2">
-                            List Name
-                        </label>
+                <div>
+                    <div className="mb-4">
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">List Name</label>
                         <input
-                            type="text"
                             value={listForm.name}
                             onChange={(e) => setListForm({ ...listForm, name: e.target.value })}
-                            placeholder="e.g., My Project Domains"
-                            className="w-full h-11 px-4 border border-[#e5e7eb] rounded-lg text-sm focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/10 outline-none"
+                            className="w-full h-10 px-3 border border-slate-300 dark:border-slate-700 rounded outline-none focus:border-slate-500 bg-white dark:bg-slate-900"
+                            placeholder="e.g. My Project Domains"
                         />
                     </div>
-                    <div>
-                        <label className="block text-xs font-medium text-[#5e6674] uppercase tracking-wide mb-2">
-                            List Content
-                        </label>
+                    <div className="mb-4">
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Content</label>
                         <textarea
                             value={listForm.content}
                             onChange={(e) => setListForm({ ...listForm, content: e.target.value })}
-                            placeholder="domain1.com..."
-                            rows={6}
-                            className="w-full px-4 py-3 border border-[#e5e7eb] rounded-lg text-sm font-mono focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/10 outline-none resize-none"
+                            className="w-full h-40 p-3 border border-slate-300 dark:border-slate-700 rounded outline-none focus:border-slate-500 font-mono text-sm bg-white dark:bg-slate-900"
+                            placeholder="Paste lines here..."
                         />
                     </div>
-                    <div className="flex gap-3 pt-2">
-                        <Button variant="secondary" onClick={() => setListModal({ open: false, list: null })} className="flex-1">
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSaveList} className="flex-1">
-                            Save List
-                        </Button>
+                    <div className="flex justify-end gap-2">
+                        <Button variant="secondary" onClick={() => setListModal({ open: false, list: null })}>Cancel</Button>
+                        <Button onClick={handleSaveList}>Save List</Button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* VMTA Selection Modal - MISSING FROM PREVIOUS VERSION */}
+            <Modal
+                isOpen={vmtaModal.open}
+                onClose={() => setVmtaModal({ open: false, vmtas: [], filterData: [] })}
+                title="Multiple VMTAs Detected"
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-slate-500 text-center">
+                        Your filter list contains lines for multiple VMTAs. Please choose which group to process.
+                    </p>
+                    <div className="border border-slate-200 dark:border-slate-700 rounded-lg max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                        {vmtaModal.vmtas.map((vmta, idx) => (
+                            <button
+                                key={vmta}
+                                onClick={() => {
+                                    executeProcessing(vmta, vmtaModal.filterData, 'number');
+                                    setVmtaModal({ open: false, vmtas: [], filterData: [] });
+                                }}
+                                className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex flex-col transition-colors"
+                            >
+                                <span className="font-bold text-slate-900 dark:text-white">VMTA: {vmta}</span>
+                                <span className="text-xs text-slate-500">Process lines extracted for this VMTA</span>
+                            </button>
+                        ))}
+                        {vmtaModal.hasNullVmta && (
+                            <button
+                                onClick={() => {
+                                    executeProcessing('null', vmtaModal.filterData, 'number');
+                                    setVmtaModal({ open: false, vmtas: [], filterData: [] });
+                                }}
+                                className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex flex-col transition-colors"
+                            >
+                                <span className="font-bold text-slate-900 dark:text-white">Generic (No VMTA)</span>
+                                <span className="text-xs text-slate-500">Process generic line numbers</span>
+                            </button>
+                        )}
+                    </div>
+                    <div className="flex justify-end">
+                        <Button variant="secondary" onClick={() => setVmtaModal({ open: false, vmtas: [], filterData: [] })}>Cancel</Button>
                     </div>
                 </div>
             </Modal>
@@ -596,61 +538,9 @@ export default function AuraRemover() {
                 onClose={() => setDeleteConfirm({ open: false, listId: null })}
                 onConfirm={handleDeleteList}
                 title="Delete List"
-                message="Are you sure you want to delete this list? This cannot be undone."
-                confirmText="Delete"
+                message="Are you sure you want to delete this list? This action cannot be undone."
                 variant="danger"
             />
-
-            {/* VMTA Selection Modal */}
-            <Modal
-                isOpen={vmtaModal.open}
-                onClose={() => setVmtaModal({ open: false, vmtas: [], filterData: [] })}
-                title="Multiple VMTAs Detected"
-                size="sm"
-            >
-                <p className="text-sm text-[#5e6674] mb-4">
-                    Your filter list contains lines for multiple VMTAs. Please choose which group to process.
-                </p>
-                <div className="space-y-2 mb-6 max-h-48 overflow-y-auto">
-                    {vmtaModal.vmtas?.map((vmta, i) => (
-                        <label key={vmta} className="flex items-center gap-3 p-2 rounded hover:bg-[#f9fafb] cursor-pointer">
-                            <input
-                                type="radio"
-                                name="vmta-select"
-                                value={vmta}
-                                defaultChecked={i === 0}
-                                className="w-4 h-4"
-                            />
-                            <span className="text-sm">Process only "<strong>{vmta}</strong>" lines</span>
-                        </label>
-                    ))}
-                    {vmtaModal.hasNullVmta && (
-                        <label className="flex items-center gap-3 p-2 rounded hover:bg-[#f9fafb] cursor-pointer">
-                            <input
-                                type="radio"
-                                name="vmta-select"
-                                value="null"
-                                className="w-4 h-4"
-                            />
-                            <span className="text-sm">Process only lines with <strong>no VMTA</strong></span>
-                        </label>
-                    )}
-                </div>
-                <div className="flex gap-3">
-                    <Button variant="secondary" onClick={() => setVmtaModal({ open: false, vmtas: [], filterData: [] })} className="flex-1">
-                        Cancel
-                    </Button>
-                    <Button onClick={() => {
-                        const selected = document.querySelector('input[name="vmta-select"]:checked')?.value;
-                        if (selected) {
-                            executeProcessing(selected, vmtaModal.filterData, 'number');
-                            setVmtaModal({ open: false, vmtas: [], filterData: [] });
-                        }
-                    }} className="flex-1">
-                        Process Selected
-                    </Button>
-                </div>
-            </Modal>
         </div>
     );
 }
