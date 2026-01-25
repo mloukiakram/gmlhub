@@ -1,0 +1,11 @@
+USE test;
+
+CREATE TABLE auth_users (
+  id INT NOT NULL AUTO_INCREMENT,
+  username VARCHAR(50) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  role VARCHAR(20) DEFAULT 'user',
+  PRIMARY KEY (id),
+  UNIQUE KEY username_idx (username)
+);

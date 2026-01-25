@@ -1,0 +1,21 @@
+USE test;
+
+INSERT INTO auth_users (id, username, password, role) VALUES
+(1, 'admin', '$2y$10$pqsZLjPOXTwgTyZ83AxgIuy7fBGjKHLkek36HyT0a23bCW1do265y', 'admin'),
+(2, 'khalid', '$2y$10$1HygDM.nU0z6rqpg6flkb.KX0pXY15zzwXSyRJ5O26/jqnfiY4SAG', 'user'),
+(3, 'hatim', '$2y$10$mYTO8kW8nmNidQvVuWJa1.ywiUNr6qJWLZknUusTmybmFPHWLG466', 'user'),
+(4, 'charif', '$2y$10$.8CcrBM3u6qlK3/PEqLhvuyNFTslF/oBM4m4JEgYEAG66nG6xju9q', 'user'),
+(5, 'oumaima', '$2y$10$5060lbTrbFwmoPbkkJP04e56dWwPXnzqJgeicTsExRJ0QcME3n62e', 'user'),
+(6, 'akram', '$2y$10$XmUzRwFZIXsg6Cbsvw9HVOkcXy33sBDTLzp4mm44AxwLKsfrUnL5y', 'user'),
+(7, 'test', '$2y$10$IzdtG/pAW29LTcYeH63B8eROtDhgPIX6otMefb/rgs3tqK0VH2qy.', 'user');
+
+INSERT INTO users (id, session_id, name, color, created_by) VALUES
+(1, 'Akram', 'GML', '#10b981', 1),
+(2, 'Akram', 'GMS', '#f43f5e', 1);
+
+INSERT INTO user_ips (user_id, ip_address, label) VALUES
+(1, '15.204.234.112', 'sl2156'),
+(1, '15.204.236.255', 'sl2151'),
+(1, '217.182.73.127', 'sl2150'),
+(2, '74.208.88.42', 'ss273'),
+(2, '88.99.38.250', 'ss305');

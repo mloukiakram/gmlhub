@@ -1,0 +1,9 @@
+USE test;
+
+INSERT INTO auth_users (id, username, password, role) VALUES
+(1, 'admin', '$2y$10$pqsZLjPOXTwgTyZ83AxgIuy7fBGjKHLkek36HyT0a23bCW1do265y', 'admin'),
+(2, 'akram', '$2y$10$XmUzRwFZIXsg6Cbsvw9HVOkcXy33sBDTLzp4mm44AxwLKsfrUnL5y', 'user');
+
+INSERT INTO users (id, session_id, name, color, created_by) VALUES
+(1, 'Admin Session', 'GML Production', '#10b981', 1),
+(2, 'Admin Session', 'GMS Servers', '#f43f5e', 1);

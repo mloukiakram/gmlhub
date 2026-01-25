@@ -1,0 +1,32 @@
+USE test;
+
+CREATE TABLE IF NOT EXISTS auth_users (
+  id INT NOT NULL AUTO_INCREMENT,
+  username VARCHAR(50) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  role VARCHAR(20) DEFAULT 'user',
+  PRIMARY KEY (id),
+  UNIQUE KEY username_idx (username)
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT NOT NULL AUTO_INCREMENT,
+  session_id VARCHAR(255) NOT NULL,
+  name VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  color VARCHAR(20) DEFAULT NULL,
+  created_by INT DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY idx_session_id (session_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_ips (
+  id INT NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  ip_address VARCHAR(45) NOT NULL,
+  label VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_user_id (user_id)
+);
