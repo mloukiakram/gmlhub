@@ -164,13 +164,13 @@ export default function VMTADuplicate() {
     };
 
     return (
-        <div className="h-full flex flex-col bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-300">
+        <div className="h-full flex flex-col bg-base transition-colors duration-300">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-300 dark:border-slate-800 bg-white dark:bg-[#0f172a] transition-colors flex items-center justify-between flex-shrink-0 shadow-none">
+            <div className="px-6 py-4 border-b border-base bg-surface transition-colors flex items-center justify-between flex-shrink-0 shadow-none">
                 <div className="flex items-center gap-3">
                     <div>
-                        <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">VMTA Loop Generator</h1>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        <h1 className="text-lg font-bold text-main tracking-tight">VMTA Loop Generator</h1>
+                        <p className="text-xs text-secondary font-medium">
                             Generate & Duplicate PMTA Configs
                         </p>
                     </div>
@@ -181,19 +181,19 @@ export default function VMTADuplicate() {
                 {/* LEFT COLUMN - INPUTS */}
                 <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-2">
                     {/* Input Container */}
-                    <div className="flex-1 flex flex-col bg-white dark:bg-[#0f172a] rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden">
+                    <div className="flex-1 flex flex-col bg-surface rounded-lg border border-base shadow-none overflow-hidden">
 
                         {/* Tab Headers */}
-                        <div className="flex border-b border-slate-200 dark:border-slate-800">
+                        <div className="flex border-b border-base">
                             <button
                                 onClick={() => { setActiveTab('manual'); setResult(''); setIpResult(''); }}
-                                className={`flex-1 py-3 text-xs font-bold uppercase tracking-wide transition-all ${activeTab === 'manual' ? 'bg-white dark:bg-slate-900 text-blue-600 border-b-2 border-blue-600' : 'bg-slate-50 dark:bg-slate-950 text-slate-500 hover:text-slate-700'}`}
+                                className={`flex-1 py-3 text-xs font-bold uppercase tracking-wide transition-all ${activeTab === 'manual' ? 'bg-surface text-blue-600 border-b-2 border-blue-600' : 'bg-base text-secondary hover:text-main'}`}
                             >
                                 Manual Generator
                             </button>
                             <button
                                 onClick={() => { setActiveTab('config'); setResult(''); setIpResult(''); }}
-                                className={`flex-1 py-3 text-xs font-bold uppercase tracking-wide transition-all ${activeTab === 'config' ? 'bg-white dark:bg-slate-900 text-blue-600 border-b-2 border-blue-600' : 'bg-slate-50 dark:bg-slate-950 text-slate-500 hover:text-slate-700'}`}
+                                className={`flex-1 py-3 text-xs font-bold uppercase tracking-wide transition-all ${activeTab === 'config' ? 'bg-surface text-blue-600 border-b-2 border-blue-600' : 'bg-base text-secondary hover:text-main'}`}
                             >
                                 Paste Config
                             </button>
@@ -202,14 +202,14 @@ export default function VMTADuplicate() {
                         <div className="p-0 flex-1 flex flex-col overflow-y-auto">
                             {activeTab === 'config' ? (
                                 <div className="flex flex-col h-full p-4">
-                                    <label className="text-xs font-bold text-slate-500 uppercase mb-2">VMTA Source Code</label>
+                                    <label className="text-xs font-bold text-secondary uppercase mb-2">VMTA Source Code</label>
                                     <textarea
                                         value={configInput}
                                         onChange={(e) => setConfigInput(e.target.value)}
                                         placeholder={`<virtual-mta example-mta>\n smtp-source-ip 1.1.1.1\n host-name example.com\n</virtual-mta>`}
-                                        className="w-full h-full p-4 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded text-sm font-mono focus:outline-none resize-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                                        className="w-full h-full p-4 bg-base border border-base rounded text-sm font-mono focus:outline-none resize-none placeholder:text-muted"
                                     />
-                                    <p className="text-[10px] text-slate-400 mt-2">
+                                    <p className="text-[10px] text-muted mt-2">
                                         Paste existing configuration to duplicate it.
                                     </p>
                                 </div>
@@ -217,45 +217,45 @@ export default function VMTADuplicate() {
                                 <div className="flex flex-col h-full p-4 space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">ISP</label>
+                                            <label className="block text-xs font-bold text-secondary uppercase mb-1">ISP</label>
                                             <select
                                                 value={manualForm.isp}
                                                 onChange={e => setManualForm({ ...manualForm, isp: e.target.value })}
-                                                className="w-full h-9 px-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded text-sm outline-none"
+                                                className="w-full h-9 px-2 bg-base border border-base rounded text-sm outline-none text-main"
                                             >
                                                 {ISPs.map(isp => <option key={isp} value={isp}>{isp}</option>)}
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Mailer ID</label>
+                                            <label className="block text-xs font-bold text-secondary uppercase mb-1">Mailer ID</label>
                                             <input
                                                 type="text"
                                                 value={manualForm.mailerId}
                                                 onChange={e => handleMailerIdChange(e.target.value)}
                                                 placeholder="e.g. 931"
-                                                className="w-full h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded text-sm outline-none"
+                                                className="w-full h-9 px-3 bg-base border border-base rounded text-sm outline-none text-main"
                                             />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Host Name</label>
+                                        <label className="block text-xs font-bold text-secondary uppercase mb-1">Host Name</label>
                                         <input
                                             type="text"
                                             value={manualForm.hostname}
                                             onChange={e => setManualForm({ ...manualForm, hostname: e.target.value })}
                                             placeholder="e.g. ulm.edu"
-                                            className="w-full h-9 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded text-sm outline-none"
+                                            className="w-full h-9 px-3 bg-base border border-base rounded text-sm outline-none text-main"
                                         />
                                     </div>
                                     <div className="flex-1 flex flex-col">
-                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">IP & Domain List</label>
+                                        <label className="block text-xs font-bold text-secondary uppercase mb-1">IP & Domain List</label>
                                         <textarea
                                             value={manualForm.ipList}
                                             onChange={(e) => setManualForm({ ...manualForm, ipList: e.target.value })}
                                             placeholder={`1.1.1.1\nOR\nIPv6,Domain,ID`}
-                                            className="w-full h-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded text-sm font-mono outline-none resize-none"
+                                            className="w-full h-full p-3 bg-base border border-base rounded text-sm font-mono outline-none resize-none text-main"
                                         />
-                                        <p className="text-[10px] text-slate-400 mt-2">
+                                        <p className="text-[10px] text-muted mt-2">
                                             One IP per line. For IPv6, use: IP,Domain,ID
                                         </p>
                                     </div>
@@ -265,26 +265,26 @@ export default function VMTADuplicate() {
                     </div>
 
                     {/* Controls */}
-                    <div className="bg-white dark:bg-[#0f172a] p-4 rounded-lg border border-slate-300 dark:border-slate-700 shadow-none">
+                    <div className="bg-surface p-4 rounded-lg border border-base shadow-none">
                         <div className="flex items-end gap-4">
                             <div className="flex-1">
-                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Loop Count</label>
+                                <label className="block text-xs font-bold text-secondary uppercase mb-2">Loop Count</label>
                                 <input
                                     type="number"
                                     min="1"
                                     value={loopCount}
                                     onChange={(e) => setLoopCount(parseInt(e.target.value) || 1)}
-                                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded font-bold outline-none focus:border-blue-500"
+                                    className="w-full h-10 px-3 bg-base border border-base rounded font-bold outline-none focus:border-blue-500 text-main"
                                 />
                             </div>
                             <div className="flex-1">
-                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Naming Format</label>
+                                <label className="block text-xs font-bold text-secondary uppercase mb-2">Naming Format</label>
                                 <div className="flex items-center gap-2 h-10">
                                     <label className="flex items-center cursor-pointer gap-2 select-none">
                                         <div className={`w-10 h-5 rounded-full p-1 transition-colors ${sequential ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`} onClick={() => setSequential(!sequential)}>
                                             <div className={`w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${sequential ? 'translate-x-5' : 'translate-x-0'}`} />
                                         </div>
-                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                        <span className="text-sm font-medium text-main">
                                             {sequential ? 'Sequential' : 'Standard'}
                                         </span>
                                     </label>
@@ -300,15 +300,15 @@ export default function VMTADuplicate() {
                 {/* RIGHT COLUMN - OUTPUT */}
                 <div className="flex-1 flex flex-col gap-6 overflow-hidden">
                     {/* Config Output */}
-                    <div className="flex-1 flex flex-col bg-white dark:bg-[#0f172a] rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden h-1/2">
-                        <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                    <div className="flex-1 flex flex-col bg-surface rounded-lg border border-base shadow-none overflow-hidden h-1/2">
+                        <div className="px-5 py-3 border-b border-base bg-base flex justify-between items-center">
                             <div className="flex items-center gap-2">
-                                <FileText size={14} className="text-slate-500" />
-                                <label className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">VMTA Config Output</label>
+                                <FileText size={14} className="text-secondary" />
+                                <label className="text-xs font-bold text-main uppercase tracking-wide">VMTA Config Output</label>
                             </div>
                             <button
                                 onClick={() => copyToClipboard(result, 'config')}
-                                className={`p-1.5 rounded-md transition-all ${copied.config ? 'bg-green-100 text-green-600 dark:bg-green-900/30' : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300'}`}
+                                className={`p-1.5 rounded-md transition-all ${copied.config ? 'bg-green-100 text-green-600 dark:bg-green-900/30' : 'bg-base hover:bg-surface-hover text-secondary'}`}
                                 title="Copy Content"
                             >
                                 {copied.config ? <Check size={16} /> : <Copy size={16} />}
@@ -318,21 +318,21 @@ export default function VMTADuplicate() {
                             value={result}
                             readOnly
                             placeholder="Generated VMTA config blocks..."
-                            className="flex-1 w-full p-5 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-sm font-mono resize-none focus:outline-none"
+                            className="flex-1 w-full p-5 bg-base text-main text-sm font-mono resize-none focus:outline-none"
                         />
                     </div>
 
                     {/* IP List Output (Only visible if active or content exists) */}
                     {(activeTab === 'manual' || ipResult) && (
-                        <div className="flex-1 flex flex-col bg-white dark:bg-[#0f172a] rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden h-1/2">
-                            <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                        <div className="flex-1 flex flex-col bg-surface rounded-lg border border-base shadow-none overflow-hidden h-1/2">
+                            <div className="px-5 py-3 border-b border-base bg-base flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                    <List size={14} className="text-slate-500" />
-                                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">IP & Domain List Output</label>
+                                    <List size={14} className="text-secondary" />
+                                    <label className="text-xs font-bold text-main uppercase tracking-wide">IP & Domain List Output</label>
                                 </div>
                                 <button
                                     onClick={() => copyToClipboard(ipResult, 'ip')}
-                                    className={`p-1.5 rounded-md transition-all ${copied.ip ? 'bg-green-100 text-green-600 dark:bg-green-900/30' : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300'}`}
+                                    className={`p-1.5 rounded-md transition-all ${copied.ip ? 'bg-green-100 text-green-600 dark:bg-green-900/30' : 'bg-base hover:bg-surface-hover text-secondary'}`}
                                     title="Copy Content"
                                 >
                                     {copied.ip ? <Check size={16} /> : <Copy size={16} />}
@@ -342,7 +342,7 @@ export default function VMTADuplicate() {
                                 value={ipResult}
                                 readOnly
                                 placeholder="Generated IP list entries..."
-                                className="flex-1 w-full p-5 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-sm font-mono resize-none focus:outline-none"
+                                className="flex-1 w-full p-5 bg-base text-main text-sm font-mono resize-none focus:outline-none"
                             />
                         </div>
                     )}

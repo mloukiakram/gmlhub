@@ -172,13 +172,13 @@ export default function BounceCleaner() {
     };
 
     return (
-        <div className="h-full flex flex-col bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-300">
+        <div className="h-full flex flex-col bg-base transition-colors duration-300">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-300 dark:border-slate-800 bg-white dark:bg-[#0f172a] transition-colors flex items-center justify-between flex-shrink-0">
+            <div className="px-6 py-4 border-b border-base bg-surface transition-colors flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-3">
                     <div>
-                        <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Bounce Cleaner</h1>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        <h1 className="text-lg font-bold text-main tracking-tight">Bounce Cleaner</h1>
+                        <p className="text-xs text-secondary font-medium">
                             Professional Domain Cleaning
                         </p>
                     </div>
@@ -189,7 +189,7 @@ export default function BounceCleaner() {
                         size="sm"
                         icon={Database}
                         onClick={() => setLibraryModal(true)}
-                        className="bg-white hover:bg-slate-50 border-slate-300 dark:border-slate-700 dark:bg-slate-900"
+                        className="bg-surface hover:bg-surface-hover border-base"
                     >
                         Server Library
                     </Button>
@@ -198,7 +198,7 @@ export default function BounceCleaner() {
                         size="sm"
                         icon={History}
                         onClick={() => setHistoryModal(true)}
-                        className="bg-white hover:bg-slate-50 border-slate-300 dark:border-slate-700 dark:bg-slate-900"
+                        className="bg-surface hover:bg-surface-hover border-base"
                     >
                         History
                     </Button>
@@ -208,17 +208,17 @@ export default function BounceCleaner() {
             {/* Content - DENSE LAYOUT, NO SCROLLING */}
             <div className="flex-1 overflow-hidden p-6 flex gap-6">
                 {/* Left Panel: Source */}
-                <div className="flex-1 flex flex-col bg-white dark:bg-[#0f172a] rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
-                        <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 uppercase tracking-wide">
-                            <Globe size={14} className="text-slate-500" />
+                <div className="flex-1 flex flex-col bg-surface rounded-lg border border-base shadow-none overflow-hidden">
+                    <div className="px-4 py-3 border-b border-base bg-base flex justify-between items-center">
+                        <label className="text-xs font-bold text-main flex items-center gap-2 uppercase tracking-wide">
+                            <Globe size={14} className="text-secondary" />
                             Source List
                         </label>
                         <div className="flex gap-2">
-                            <span className="text-[10px] font-mono px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                            <span className="text-[10px] font-mono px-2 py-0.5 bg-base rounded text-secondary border border-base">
                                 {domains ? domains.split('\n').filter(Boolean).length : 0} lines
                             </span>
-                            <button onClick={() => setDomains('')} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-400">
+                            <button onClick={() => setDomains('')} className="p-1 hover:bg-surface-hover rounded text-secondary">
                                 <RefreshCw size={12} />
                             </button>
                         </div>
@@ -227,23 +227,23 @@ export default function BounceCleaner() {
                         value={domains}
                         onChange={(e) => setDomains(e.target.value)}
                         placeholder="Paste domains here..."
-                        className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-slate-900 dark:text-slate-200 resize-none focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                        className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-main resize-none focus:outline-none placeholder:text-muted"
                     />
                 </div>
 
                 {/* Right Panel: Bounced Input */}
-                <div className="flex-1 flex flex-col bg-white dark:bg-[#0f172a] rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden relative">
-                    <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
-                        <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 uppercase tracking-wide">
-                            <Shield size={14} className="text-slate-500" />
+                <div className="flex-1 flex flex-col bg-surface rounded-lg border border-base shadow-none overflow-hidden relative">
+                    <div className="px-4 py-3 border-b border-base bg-base flex justify-between items-center">
+                        <label className="text-xs font-bold text-main flex items-center gap-2 uppercase tracking-wide">
+                            <Shield size={14} className="text-secondary" />
                             Bounced Input
                         </label>
-                        <label className="flex items-center gap-1.5 text-[10px] font-medium text-slate-500 dark:text-slate-400 cursor-pointer select-none px-2 py-0.5 border border-transparent hover:border-slate-200 rounded">
+                        <label className="flex items-center gap-1.5 text-[10px] font-medium text-secondary cursor-pointer select-none px-2 py-0.5 border border-transparent hover:border-base rounded">
                             <input
                                 type="checkbox"
                                 checked={deduplicateMaster}
                                 onChange={(e) => setDeduplicateMaster(e.target.checked)}
-                                className="w-3 h-3 rounded text-slate-600 border-slate-300"
+                                className="w-3 h-3 rounded text-secondary border-base"
                             />
                             Dedupe Source
                         </label>
@@ -252,7 +252,7 @@ export default function BounceCleaner() {
                         value={bouncedDomains}
                         onChange={(e) => setBouncedDomains(e.target.value)}
                         placeholder="Paste bounced emails or return paths here..."
-                        className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-slate-900 dark:text-slate-200 resize-none focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                        className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-main resize-none focus:outline-none placeholder:text-muted"
                     />
 
                     {/* Action Bar Overlay - Simpler */}
@@ -282,45 +282,45 @@ export default function BounceCleaner() {
                             placeholder="Search library..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-64 h-9 px-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-sm outline-none focus:border-slate-500"
+                            className="w-64 h-9 px-3 bg-base border border-base rounded-md text-sm outline-none focus:border-blue-500 text-main"
                         />
                         <div className="flex gap-2">
                             <input type="file" accept=".json" onChange={handleImport} className="hidden" id="import-file" />
-                            <Button variant="outline" size="sm" icon={Upload} onClick={() => document.getElementById('import-file').click()}>Import</Button>
-                            <Button variant="outline" size="sm" icon={Download} onClick={handleExport}>Export</Button>
+                            <Button variant="outline" size="sm" icon={Upload} onClick={() => document.getElementById('import-file').click()} className="border-base">Import</Button>
+                            <Button variant="outline" size="sm" icon={Download} onClick={handleExport} className="border-base">Export</Button>
                             <Button size="sm" icon={Plus} onClick={() => openServerModal()} className="bg-slate-900 text-white hover:bg-slate-800">Add Server</Button>
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-auto border border-slate-300 dark:border-slate-700 rounded-lg">
+                    <div className="flex-1 overflow-auto border border-base rounded-lg">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-100 dark:bg-slate-800 sticky top-0 z-10 border-b border-slate-300 dark:border-slate-700">
+                            <thead className="bg-base sticky top-0 z-10 border-b border-base">
                                 <tr>
-                                    <th className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300">Server Name</th>
-                                    <th className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300">IPs / Domains</th>
-                                    <th className="px-4 py-3 text-right font-semibold text-slate-600 dark:text-slate-300">Actions</th>
+                                    <th className="px-4 py-3 font-semibold text-secondary">Server Name</th>
+                                    <th className="px-4 py-3 font-semibold text-secondary">IPs / Domains</th>
+                                    <th className="px-4 py-3 text-right font-semibold text-secondary">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                            <tbody className="divide-y divide-base">
                                 {filteredServers.map(server => (
-                                    <tr key={server.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 group">
-                                        <td className="px-4 py-2.5 font-medium text-slate-900 dark:text-white">
+                                    <tr key={server.id} className="hover:bg-surface-hover group">
+                                        <td className="px-4 py-2.5 font-medium text-main">
                                             {server.name}
-                                            {currentServerId === server.id && <span className="ml-2 text-xs text-slate-500">(Active)</span>}
+                                            {currentServerId === server.id && <span className="ml-2 text-xs text-secondary">(Active)</span>}
                                         </td>
-                                        <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                                        <td className="px-4 py-2.5 text-secondary">
                                             {server.ips.split('\n').filter(Boolean).length} IPs · {server.domains.split('\n').filter(Boolean).length} Domains
                                         </td>
                                         <td className="px-4 py-2.5 text-right">
                                             <div className="flex justify-end gap-2">
-                                                <Button size="xs" variant="outline" onClick={() => loadServer(server)} className="border-slate-300">Load</Button>
-                                                <Button variant="outline" size="xs" icon={Pencil} onClick={() => openServerModal(server)} className="border-slate-300" />
-                                                <Button variant="outline" size="xs" icon={Trash2} className="text-slate-500 hover:text-slate-700 border-slate-300" onClick={() => setDeleteModal({ open: true, serverIds: [server.id] })} />
+                                                <Button size="xs" variant="outline" onClick={() => loadServer(server)} className="border-base">Load</Button>
+                                                <Button variant="outline" size="xs" icon={Pencil} onClick={() => openServerModal(server)} className="border-base" />
+                                                <Button variant="outline" size="xs" icon={Trash2} className="text-secondary hover:text-main border-base" onClick={() => setDeleteModal({ open: true, serverIds: [server.id] })} />
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
-                                {filteredServers.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-slate-500">No servers found</td></tr>}
+                                {filteredServers.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-secondary">No servers found</td></tr>}
                             </tbody>
                         </table>
                     </div>
@@ -335,30 +335,30 @@ export default function BounceCleaner() {
             >
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Server Name</label>
+                        <label className="block text-xs font-bold text-secondary uppercase mb-1">Server Name</label>
                         <input
                             type="text"
                             value={serverForm.name}
                             onChange={e => setServerForm({ ...serverForm, name: e.target.value })}
-                            className="w-full h-10 px-3 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 outline-none focus:border-slate-500"
+                            className="w-full h-10 px-3 border border-base rounded bg-base outline-none focus:border-blue-500 text-main"
                             placeholder="e.g. sl2147"
                         />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">IP Addresses</label>
+                        <label className="block text-xs font-bold text-secondary uppercase mb-1">IP Addresses</label>
                         <textarea
                             value={serverForm.ips}
                             onChange={e => setServerForm({ ...serverForm, ips: e.target.value })}
-                            className="w-full h-32 p-3 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 outline-none focus:border-slate-500 font-mono text-sm"
+                            className="w-full h-32 p-3 border border-base rounded bg-base outline-none focus:border-blue-500 font-mono text-sm text-main"
                             placeholder="192.168.1.1"
                         />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Master Domain List</label>
+                        <label className="block text-xs font-bold text-secondary uppercase mb-1">Master Domain List</label>
                         <textarea
                             value={serverForm.domains}
                             onChange={e => setServerForm({ ...serverForm, domains: e.target.value })}
-                            className="w-full h-32 p-3 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 outline-none focus:border-slate-500 font-mono text-sm"
+                            className="w-full h-32 p-3 border border-base rounded bg-base outline-none focus:border-blue-500 font-mono text-sm text-main"
                             placeholder="domain1.com"
                         />
                     </div>
@@ -380,7 +380,7 @@ export default function BounceCleaner() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 overflow-hidden">
                         <div className="flex flex-col h-64 md:h-96">
                             <div className="flex justify-between items-center mb-2">
-                                <label className="text-xs font-bold text-slate-500 uppercase">
+                                <label className="text-xs font-bold text-secondary uppercase">
                                     Kept Domains ({lastResults.kept.length})
                                 </label>
                                 <div className="flex gap-2">
@@ -395,13 +395,13 @@ export default function BounceCleaner() {
                             <textarea
                                 readOnly
                                 value={lastResults.kept.join('\n')}
-                                className="flex-1 w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm font-mono resize-none focus:outline-none"
+                                className="flex-1 w-full p-3 bg-base border border-base rounded text-sm font-mono resize-none focus:outline-none text-main"
                             />
                         </div>
 
                         <div className="flex flex-col h-64 md:h-96">
                             <div className="flex justify-between items-center mb-2">
-                                <label className="text-xs font-bold text-slate-500 uppercase">
+                                <label className="text-xs font-bold text-secondary uppercase">
                                     Removed Domains ({lastResults.removed.length})
                                 </label>
                                 <div className="flex gap-2">
@@ -420,7 +420,7 @@ export default function BounceCleaner() {
                             />
                         </div>
                     </div>
-                    <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex justify-end pt-2 border-t border-base">
                         <Button onClick={() => setResultsModal(false)}>Close</Button>
                     </div>
                 </div>
@@ -434,13 +434,13 @@ export default function BounceCleaner() {
                 size="md"
             >
                 <div className="flex flex-col h-[400px]">
-                    <p className="text-sm text-slate-500 mb-2">
+                    <p className="text-sm text-secondary mb-2">
                         Found {lastResults.preview?.length || 0} unique domains in "Bounced Input".
                     </p>
                     <textarea
                         readOnly
                         value={lastResults.preview ? lastResults.preview.join('\n') : ''}
-                        className="flex-1 w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm font-mono resize-none focus:outline-none"
+                        className="flex-1 w-full p-3 bg-base border border-base rounded text-sm font-mono resize-none focus:outline-none text-main"
                     />
                     <div className="flex justify-end gap-2 mt-4">
                         <Button variant="secondary" onClick={() => copyToClipboard(lastResults.preview?.join('\n') || '', 'domains')}>Copy List</Button>
@@ -458,7 +458,7 @@ export default function BounceCleaner() {
             >
                 <div className="flex flex-col h-[500px]">
                     <div className="flex items-center justify-between mb-4">
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-secondary">
                             Total Bounced Domains: {appData.bounceHistory.length}
                         </p>
                         <div className="flex gap-2">
@@ -470,7 +470,7 @@ export default function BounceCleaner() {
                     <textarea
                         readOnly
                         value={appData.bounceHistory.join('\n')}
-                        className="flex-1 w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm font-mono resize-none focus:outline-none"
+                        className="flex-1 w-full p-3 bg-base border border-base rounded text-sm font-mono resize-none focus:outline-none text-main"
                     />
                     <div className="flex justify-end gap-2 mt-4">
                         <Button variant="secondary" onClick={() => copyToClipboard(appData.bounceHistory.join('\n'), 'domains')}>Copy All</Button>

@@ -119,25 +119,25 @@ export default function PMTAMonitor() {
     );
 
     return (
-        <div className="h-full flex flex-col bg-[#fafbfc] dark:bg-[#020617] transition-colors duration-300">
+        <div className="h-full flex flex-col bg-base transition-colors duration-300">
             {/* Header */}
-            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] transition-colors duration-300">
+            <div className="flex items-center justify-between px-8 py-6 border-b border-base bg-surface transition-colors duration-300">
                 <div>
-                    <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">PMTA Monitor</h1>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                    <h1 className="text-xl font-bold text-main tracking-tight">PMTA Monitor</h1>
+                    <p className="text-sm text-secondary mt-0.5 font-medium">
                         {totalSessions} sessions · {totalIps} IPs monitored
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="relative group">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-blue-500 transition-colors" />
                         <input
                             type="text"
                             placeholder="Search sessions..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="h-10 pl-9 pr-4 w-[240px] bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm 
-                                focus:ring-2 focus:ring-blue-500/20 text-slate-900 dark:text-white placeholder:text-slate-400
+                            className="h-10 pl-9 pr-4 w-[240px] bg-base border-none rounded-xl text-sm 
+                                focus:ring-2 focus:ring-blue-500/20 text-main placeholder:text-muted
                                 transition-all"
                         />
                     </div>

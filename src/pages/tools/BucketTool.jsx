@@ -9,13 +9,13 @@ export default function BucketTool() {
     const TOOL_URL = 'https://gcs-bucket-tool-1.onrender.com/';
 
     return (
-        <div className={`h-full flex flex-col bg-[#fafbfc] dark:bg-[#020617] ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
+        <div className={`h-full flex flex-col bg-base ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
             {/* Header */}
-            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] transition-colors flex-shrink-0">
+            <div className="flex items-center justify-between px-8 py-6 border-b border-base bg-surface transition-colors flex-shrink-0">
                 <div className="flex items-center gap-3">
                     <div>
-                        <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Bucket Tool</h1>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                        <h1 className="text-xl font-bold text-main tracking-tight">Bucket Tool</h1>
+                        <p className="text-sm text-secondary mt-0.5 font-medium">
                             GCS Bucket management tool
                         </p>
                     </div>

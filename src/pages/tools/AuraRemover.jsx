@@ -238,13 +238,13 @@ export default function AuraRemover() {
     };
 
     return (
-        <div className="h-full flex flex-col bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-300">
+        <div className="h-full flex flex-col bg-base transition-colors duration-300">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-300 dark:border-slate-800 bg-white dark:bg-[#0f172a] transition-colors flex items-center justify-between flex-shrink-0">
+            <div className="px-6 py-4 border-b border-base bg-surface transition-colors flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-3">
                     <div>
-                        <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Lines Processor</h1>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        <h1 className="text-lg font-bold text-main tracking-tight">Lines Processor</h1>
+                        <p className="text-xs text-secondary font-medium">
                             Professional Line Management
                         </p>
                     </div>
@@ -255,7 +255,7 @@ export default function AuraRemover() {
                         size="sm"
                         icon={Database}
                         onClick={() => setLibraryModal(true)}
-                        className="bg-white hover:bg-slate-50 border-slate-300 dark:border-slate-700 dark:bg-slate-900"
+                        className="bg-surface hover:bg-surface-hover border-base"
                     >
                         List Library
                     </Button>
@@ -265,7 +265,7 @@ export default function AuraRemover() {
                         icon={Undo2}
                         disabled={!lastActionState}
                         onClick={handleUndo}
-                        className="bg-white hover:bg-slate-50 border-slate-300 dark:border-slate-700 dark:bg-slate-900"
+                        className="bg-surface hover:bg-surface-hover border-base"
                     >
                         Undo Last
                     </Button>
@@ -279,9 +279,9 @@ export default function AuraRemover() {
                 <div className="flex-1 flex flex-col gap-6 min-w-0">
 
                     {/* Source List */}
-                    <div className="flex-[3] flex flex-col bg-white dark:bg-[#0f172a] rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden relative group transition-all hover:border-slate-400 dark:hover:border-slate-600">
-                        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
-                            <label className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
+                    <div className="flex-[3] flex flex-col bg-surface rounded-lg border border-base shadow-none overflow-hidden relative group transition-all hover:border-slate-400 dark:hover:border-slate-600">
+                        <div className="px-4 py-3 border-b border-base bg-base flex justify-between items-center">
+                            <label className="text-xs font-bold text-main uppercase tracking-wide flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                                 1. Source List
                             </label>
@@ -295,28 +295,28 @@ export default function AuraRemover() {
                                 setSourceList(e.target.value);
                                 if (currentLoadedListId) setCurrentLoadedListId(null);
                             }}
-                            className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-slate-900 dark:text-slate-200 resize-none focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-700"
+                            className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-main resize-none focus:outline-none placeholder:text-muted"
                             spellCheck={false}
                         />
                     </div>
 
                     {/* Filter & Actions */}
-                    <div className="flex-[2] flex flex-col bg-white dark:bg-[#0f172a] rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden relative hover:border-slate-400 dark:hover:border-slate-600 transition-all">
-                        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
-                            <label className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
+                    <div className="flex-[2] flex flex-col bg-surface rounded-lg border border-base shadow-none overflow-hidden relative hover:border-slate-400 dark:hover:border-slate-600 transition-all">
+                        <div className="px-4 py-3 border-b border-base bg-base flex justify-between items-center">
+                            <label className="text-xs font-bold text-main uppercase tracking-wide flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
                                 2. Filter Configuration
                             </label>
-                            <div className="flex bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-0.5 shadow-sm">
+                            <div className="flex bg-surface rounded-md border border-base p-0.5 shadow-sm">
                                 <button
                                     onClick={() => setFilterBy('number')}
-                                    className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${filterBy === 'number' ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                    className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${filterBy === 'number' ? 'bg-base text-main shadow-sm' : 'text-secondary hover:text-main'}`}
                                 >
                                     Number
                                 </button>
                                 <button
                                     onClick={() => setFilterBy('keyword')}
-                                    className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${filterBy === 'keyword' ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                    className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${filterBy === 'keyword' ? 'bg-base text-main shadow-sm' : 'text-secondary hover:text-main'}`}
                                 >
                                     Keyword
                                 </button>
@@ -326,22 +326,22 @@ export default function AuraRemover() {
                             <textarea
                                 value={filterData}
                                 onChange={(e) => setFilterData(e.target.value)}
-                                className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-slate-900 dark:text-slate-200 resize-none focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-700 mb-16"
+                                className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-main resize-none focus:outline-none placeholder:text-muted mb-16"
                                 spellCheck={false}
                             />
                             {/* Action Bar Integrated at Bottom of Filter */}
                             <div className="absolute bottom-4 left-4 right-4 flex gap-3">
-                                <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <div className="flex bg-base p-1 rounded-lg border border-base">
                                     <button
                                         onClick={() => setMode('delete')}
-                                        className={`px-3 py-2 rounded-md flex items-center justify-center transition-all ${mode === 'delete' ? 'bg-white dark:bg-slate-800 text-red-600 shadow-sm font-bold' : 'text-slate-400'}`}
+                                        className={`px-3 py-2 rounded-md flex items-center justify-center transition-all ${mode === 'delete' ? 'bg-surface text-red-600 shadow-sm font-bold' : 'text-muted'}`}
                                         title="Delete Mode"
                                     >
                                         <Trash2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => setMode('keep')}
-                                        className={`px-3 py-2 rounded-md flex items-center justify-center transition-all ${mode === 'keep' ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-sm font-bold' : 'text-slate-400'}`}
+                                        className={`px-3 py-2 rounded-md flex items-center justify-center transition-all ${mode === 'keep' ? 'bg-surface text-emerald-600 shadow-sm font-bold' : 'text-muted'}`}
                                         title="Keep Mode"
                                     >
                                         <Check size={16} />
@@ -364,15 +364,15 @@ export default function AuraRemover() {
                 </div>
 
                 {/* RIGHT PANEL: OUTPUT */}
-                <div className="flex-1 flex flex-col bg-white dark:bg-[#0f172a] rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden min-w-0">
-                    <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
-                        <label className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
+                <div className="flex-1 flex flex-col bg-surface rounded-lg border border-base shadow-none overflow-hidden min-w-0">
+                    <div className="px-4 py-3 border-b border-base bg-base flex justify-between items-center">
+                        <label className="text-xs font-bold text-main uppercase tracking-wide flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                             3. Result Output
                         </label>
                         <button
                             onClick={copyResult}
-                            className={`p-1.5 rounded-md transition-all ${copied ? 'bg-green-100 text-green-600 dark:bg-green-900/30' : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300'}`}
+                            className={`p-1.5 rounded-md transition-all ${copied ? 'bg-green-100 text-green-600 dark:bg-green-900/30' : 'bg-base hover:bg-surface-hover text-secondary'}`}
                             title="Copy Result"
                         >
                             {copied ? <Check size={16} /> : <Copy size={16} />}
@@ -381,14 +381,14 @@ export default function AuraRemover() {
                     <textarea
                         value={result}
                         readOnly
-                        className="flex-1 w-full p-4 bg-[#f8fafc] dark:bg-[#1a1d21] text-slate-700 dark:text-slate-300 text-sm font-mono resize-none focus:outline-none"
+                        className="flex-1 w-full p-4 bg-base text-main text-sm font-mono resize-none focus:outline-none"
                     />
-                    <div className="h-40 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden flex flex-col">
-                        <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50">Processing Log</div>
+                    <div className="h-40 border-t border-base bg-surface overflow-hidden flex flex-col">
+                        <div className="px-4 py-2 border-b border-base text-[10px] font-bold text-secondary uppercase bg-base">Processing Log</div>
                         <textarea
                             value={log}
                             readOnly
-                            className="flex-1 w-full p-3 bg-transparent text-xs font-mono text-slate-600 dark:text-slate-400 resize-none focus:outline-none"
+                            className="flex-1 w-full p-3 bg-transparent text-xs font-mono text-secondary resize-none focus:outline-none"
                         />
                     </div>
                 </div>
@@ -408,49 +408,49 @@ export default function AuraRemover() {
                             placeholder="Search saved lists..."
                             value={librarySearch}
                             onChange={(e) => setLibrarySearch(e.target.value)}
-                            className="w-64 h-9 px-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-sm outline-none focus:border-slate-500"
+                            className="w-64 h-9 px-3 bg-base border border-base rounded-md text-sm outline-none focus:border-blue-500 text-main"
                         />
                         <div className="flex gap-2">
                             <input type="file" accept=".json" onChange={handleImport} className="hidden" id="import-file" />
-                            <Button variant="outline" size="sm" icon={Upload} onClick={() => document.getElementById('import-file').click()}>Import</Button>
-                            <Button variant="outline" size="sm" icon={Download} onClick={handleExport}>Export</Button>
+                            <Button variant="outline" size="sm" icon={Upload} onClick={() => document.getElementById('import-file').click()} className="border-base">Import</Button>
+                            <Button variant="outline" size="sm" icon={Download} onClick={handleExport} className="border-base">Export</Button>
                             <Button size="sm" icon={Plus} onClick={() => {
                                 setListForm({ name: '', content: '' });
                                 setListModal({ open: true, list: null });
-                            }} className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900">New List</Button>
+                            }} className="bg-slate-900 text-white hover:bg-slate-800">New List</Button>
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-auto border border-slate-300 dark:border-slate-700 rounded-lg">
+                    <div className="flex-1 overflow-auto border border-base rounded-lg">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-100 dark:bg-slate-800 sticky top-0 z-10 border-b border-slate-300 dark:border-slate-700">
+                            <thead className="bg-base sticky top-0 z-10 border-b border-base">
                                 <tr>
-                                    <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">List Name</th>
-                                    <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">Line Count</th>
-                                    <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">Actions</th>
+                                    <th className="px-4 py-3 font-semibold text-secondary">List Name</th>
+                                    <th className="px-4 py-3 font-semibold text-secondary">Line Count</th>
+                                    <th className="px-4 py-3 text-right font-semibold text-secondary">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                            <tbody className="divide-y divide-base">
                                 {filteredLists.map(list => (
-                                    <tr key={list.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 group">
-                                        <td className="px-4 py-2.5 font-medium text-slate-900 dark:text-white">
+                                    <tr key={list.id} className="hover:bg-surface-hover group">
+                                        <td className="px-4 py-2.5 font-medium text-main">
                                             {list.name}
-                                            {currentLoadedListId === list.id && <span className="ml-2 text-xs text-slate-500">(Active)</span>}
+                                            {currentLoadedListId === list.id && <span className="ml-2 text-xs text-secondary">(Active)</span>}
                                         </td>
-                                        <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{list.content.split('\n').filter(Boolean).length}</td>
+                                        <td className="px-4 py-2.5 text-secondary">{list.content.split('\n').filter(Boolean).length}</td>
                                         <td className="px-4 py-2.5 text-right">
                                             <div className="flex justify-end gap-2">
-                                                <Button size="xs" variant="outline" onClick={() => loadList(list)} className="border-slate-300">Load</Button>
+                                                <Button size="xs" variant="outline" onClick={() => loadList(list)} className="border-base">Load</Button>
                                                 <Button variant="outline" size="xs" icon={Edit} onClick={() => {
                                                     setListForm({ name: list.name, content: list.content });
                                                     setListModal({ open: true, list });
-                                                }} className="border-slate-300" />
-                                                <Button variant="outline" size="xs" icon={Trash2} className="text-slate-500 hover:text-slate-700 border-slate-300" onClick={() => setDeleteConfirm({ open: true, listId: list.id })} />
+                                                }} className="border-base" />
+                                                <Button variant="outline" size="xs" icon={Trash2} className="text-secondary hover:text-main border-base" onClick={() => setDeleteConfirm({ open: true, listId: list.id })} />
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
-                                {filteredLists.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-slate-500">No lists found</td></tr>}
+                                {filteredLists.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-secondary">No lists found</td></tr>}
                             </tbody>
                         </table>
                     </div>
@@ -465,20 +465,20 @@ export default function AuraRemover() {
             >
                 <div>
                     <div className="mb-4">
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">List Name</label>
+                        <label className="block text-xs font-bold text-secondary uppercase mb-1">List Name</label>
                         <input
                             value={listForm.name}
                             onChange={(e) => setListForm({ ...listForm, name: e.target.value })}
-                            className="w-full h-10 px-3 border border-slate-300 dark:border-slate-700 rounded outline-none focus:border-slate-500 bg-white dark:bg-slate-900"
+                            className="w-full h-10 px-3 border border-base rounded outline-none focus:border-blue-500 bg-base text-main"
                             placeholder="e.g. My Project Domains"
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Content</label>
+                        <label className="block text-xs font-bold text-secondary uppercase mb-1">Content</label>
                         <textarea
                             value={listForm.content}
                             onChange={(e) => setListForm({ ...listForm, content: e.target.value })}
-                            className="w-full h-40 p-3 border border-slate-300 dark:border-slate-700 rounded outline-none focus:border-slate-500 font-mono text-sm bg-white dark:bg-slate-900"
+                            className="w-full h-40 p-3 border border-base rounded outline-none focus:border-blue-500 font-mono text-sm bg-base text-main"
                             placeholder="Paste lines here..."
                         />
                     </div>
@@ -496,10 +496,10 @@ export default function AuraRemover() {
                 title="Multiple VMTAs Detected"
             >
                 <div className="space-y-4">
-                    <p className="text-sm text-slate-500 text-center">
+                    <p className="text-sm text-secondary text-center">
                         Your filter list contains lines for multiple VMTAs. Please choose which group to process.
                     </p>
-                    <div className="border border-slate-200 dark:border-slate-700 rounded-lg max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                    <div className="border border-base rounded-lg max-h-60 overflow-y-auto divide-y divide-base">
                         {vmtaModal.vmtas.map((vmta, idx) => (
                             <button
                                 key={vmta}
@@ -507,10 +507,10 @@ export default function AuraRemover() {
                                     executeProcessing(vmta, vmtaModal.filterData, 'number');
                                     setVmtaModal({ open: false, vmtas: [], filterData: [] });
                                 }}
-                                className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex flex-col transition-colors"
+                                className="w-full text-left px-4 py-3 hover:bg-surface-hover flex flex-col transition-colors"
                             >
-                                <span className="font-bold text-slate-900 dark:text-white">VMTA: {vmta}</span>
-                                <span className="text-xs text-slate-500">Process lines extracted for this VMTA</span>
+                                <span className="font-bold text-main">VMTA: {vmta}</span>
+                                <span className="text-xs text-secondary">Process lines extracted for this VMTA</span>
                             </button>
                         ))}
                         {vmtaModal.hasNullVmta && (
@@ -519,10 +519,10 @@ export default function AuraRemover() {
                                     executeProcessing('null', vmtaModal.filterData, 'number');
                                     setVmtaModal({ open: false, vmtas: [], filterData: [] });
                                 }}
-                                className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex flex-col transition-colors"
+                                className="w-full text-left px-4 py-3 hover:bg-surface-hover flex flex-col transition-colors"
                             >
-                                <span className="font-bold text-slate-900 dark:text-white">Generic (No VMTA)</span>
-                                <span className="text-xs text-slate-500">Process generic line numbers</span>
+                                <span className="font-bold text-main">Generic (No VMTA)</span>
+                                <span className="text-xs text-secondary">Process generic line numbers</span>
                             </button>
                         )}
                     </div>

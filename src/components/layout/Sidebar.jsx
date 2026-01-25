@@ -40,19 +40,18 @@ export function Sidebar() {
             className={`
                 h-screen border-r flex flex-col
                 transition-all duration-300 ease-in-out
-                bg-white border-slate-200
-                dark:bg-[#0f172a] dark:border-slate-800
+                bg-surface border-base
                 ${collapsed ? 'w-[72px]' : 'w-[260px]'}
             `}
         >
             {/* Header */}
-            <div className={`h-16 flex items-center border-b border-slate-200 dark:border-slate-800 ${collapsed ? 'justify-center px-0' : 'px-5'}`}>
+            <div className={`h-16 flex items-center border-b border-base ${collapsed ? 'justify-center px-0' : 'px-5'}`}>
                 {!collapsed && (
                     <div className="flex items-center gap-3 animate-fade-in">
                         <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
                             <Menu size={18} className="text-white" />
                         </div>
-                        <span className="font-bold text-slate-900 dark:text-white text-[16px] tracking-tight">GML Panel</span>
+                        <span className="font-bold text-main text-[16px] tracking-tight">GML Panel</span>
                     </div>
                 )}
                 {collapsed && (
@@ -75,7 +74,7 @@ export function Sidebar() {
                                 ${collapsed ? 'justify-center px-0' : 'px-3'}
                                 ${isActive
                                     ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
-                                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
+                                    : 'text-secondary hover:bg-surface-hover hover:text-main'
                                 }
                             `}
                             style={{ animationDelay: `${index * 50}ms` }}
@@ -94,14 +93,13 @@ export function Sidebar() {
             </nav>
 
             {/* Footer */}
-            <div className="border-t border-slate-200 dark:border-slate-800 p-3 space-y-1">
+            <div className="border-t border-base p-3 space-y-1">
                 {/* Theme Toggle */}
                 <button
                     onClick={toggleTheme}
                     className={`
                         w-full h-10 rounded-lg flex items-center gap-3
-                        text-slate-500 hover:bg-slate-50 hover:text-slate-900
-                        dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white
+                        text-secondary hover:bg-surface-hover hover:text-main
                         transition-all duration-200
                         ${collapsed ? 'justify-center px-0' : 'px-3'}
                     `}
@@ -115,8 +113,7 @@ export function Sidebar() {
                     onClick={() => setCollapsed(!collapsed)}
                     className={`
                         w-full h-10 rounded-lg flex items-center gap-3
-                        text-slate-500 hover:bg-slate-50 hover:text-slate-900
-                        dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white
+                        text-secondary hover:bg-surface-hover hover:text-main
                         transition-all duration-200
                         ${collapsed ? 'justify-center px-0' : 'px-3'}
                     `}
@@ -130,8 +127,7 @@ export function Sidebar() {
                     onClick={handleLogout}
                     className={`
                         w-full h-10 rounded-lg flex items-center gap-3
-                        text-slate-500 hover:bg-red-50 hover:text-red-600
-                        dark:text-slate-400 dark:hover:bg-red-500/10 dark:hover:text-red-400
+                        text-secondary hover:bg-red-50 hover:text-red-600
                         transition-all duration-200
                         ${collapsed ? 'justify-center px-0' : 'px-3'}
                     `}
