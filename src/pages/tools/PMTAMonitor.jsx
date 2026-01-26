@@ -136,7 +136,7 @@ export default function PMTAMonitor() {
                             placeholder="Search sessions..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="h-10 pl-9 pr-4 w-[240px] bg-base border-none rounded-xl text-sm 
+                            className="h-10 pl-9 pr-4 w-[240px] bg-slate-200 dark:bg-slate-900 border-none rounded-xl text-sm 
                                 focus:ring-2 focus:ring-blue-500/20 text-main placeholder:text-muted
                                 transition-all"
                         />
@@ -403,9 +403,16 @@ function SessionItem({ session, isExpanded, onToggleMonitor, onViewIps, onEdit, 
                                             className="bg-white rounded-lg overflow-hidden shadow-lg shadow-black/20 group"
                                         >
                                             <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-                                                <span className="text-xs font-bold text-slate-700 truncate max-w-[70%] group-hover:text-blue-600 transition-colors">
+                                                <button
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(ip.label || 'Server');
+                                                        showToast('Label copied', 'success');
+                                                    }}
+                                                    className="text-xs font-bold text-slate-700 truncate max-w-[70%] hover:text-blue-600 transition-colors text-left"
+                                                    title="Click to copy"
+                                                >
                                                     {ip.label || 'Server'}
-                                                </span>
+                                                </button>
                                                 <span className="text-[10px] font-mono bg-white text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">
                                                     {ip.ip}
                                                 </span>

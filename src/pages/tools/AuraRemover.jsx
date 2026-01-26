@@ -279,7 +279,7 @@ export default function AuraRemover() {
                 <div className="flex-1 flex flex-col gap-6 min-w-0">
 
                     {/* Source List */}
-                    <div className="flex-[3] flex flex-col bg-surface rounded-lg border border-base shadow-none overflow-hidden relative group transition-all hover:border-slate-400 dark:hover:border-slate-600">
+                    <div className="flex-[3] flex flex-col bg-slate-200 dark:bg-slate-900 rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden relative group transition-all hover:border-slate-400 dark:hover:border-slate-500">
                         <div className="px-4 py-3 border-b border-base bg-base flex justify-between items-center">
                             <label className="text-xs font-bold text-main uppercase tracking-wide flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-blue-500"></span>
@@ -297,11 +297,12 @@ export default function AuraRemover() {
                             }}
                             className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-main resize-none focus:outline-none placeholder:text-muted"
                             spellCheck={false}
+                            placeholder="Paste your lines here..."
                         />
                     </div>
 
                     {/* Filter & Actions */}
-                    <div className="flex-[2] flex flex-col bg-surface rounded-lg border border-base shadow-none overflow-hidden relative hover:border-slate-400 dark:hover:border-slate-600 transition-all">
+                    <div className="flex-[2] flex flex-col bg-slate-200 dark:bg-slate-900 rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden relative hover:border-slate-400 dark:hover:border-slate-500 transition-all">
                         <div className="px-4 py-3 border-b border-base bg-base flex justify-between items-center">
                             <label className="text-xs font-bold text-main uppercase tracking-wide flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
@@ -328,6 +329,7 @@ export default function AuraRemover() {
                                 onChange={(e) => setFilterData(e.target.value)}
                                 className="flex-1 w-full p-4 bg-transparent text-sm font-mono text-main resize-none focus:outline-none placeholder:text-muted mb-16"
                                 spellCheck={false}
+                                placeholder="Paste filter numbers or keywords..."
                             />
                             {/* Action Bar Integrated at Bottom of Filter */}
                             <div className="absolute bottom-4 left-4 right-4 flex gap-3">
@@ -362,7 +364,7 @@ export default function AuraRemover() {
                 </div>
 
                 {/* RIGHT PANEL: OUTPUT */}
-                <div className="flex-1 flex flex-col bg-surface rounded-lg border border-base shadow-none overflow-hidden min-w-0">
+                <div className="flex-1 flex flex-col bg-slate-200 dark:bg-slate-900 rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden min-w-0">
                     <div className="px-4 py-3 border-b border-base bg-base flex justify-between items-center">
                         <label className="text-xs font-bold text-main uppercase tracking-wide flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -386,7 +388,7 @@ export default function AuraRemover() {
                         <textarea
                             value={log}
                             readOnly
-                            className="flex-1 w-full p-3 bg-transparent text-xs font-mono text-secondary resize-none focus:outline-none"
+                            className="flex-1 w-full p-3 bg-[#1e293b] text-xs font-mono text-slate-300 resize-none focus:outline-none"
                         />
                     </div>
                 </div>

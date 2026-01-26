@@ -18,7 +18,7 @@ import {
 
 const navItems = [
     { path: 'vmta-duplicate', label: 'VMTA Duplicate', icon: Copy },
-    { path: 'aura-remover', label: 'Aura Remover', icon: Sparkles },
+    { path: 'aura-remover', label: 'Lines Processor', icon: Sparkles },
     { path: 'bounce-cleaner', label: 'Bounce Cleaner', icon: Trash2 },
     { path: 'pmta-monitor', label: 'PMTA Monitor', icon: Monitor },
     { path: 'bucket-tool', label: 'Bucket Tool', icon: HardDrive },
@@ -48,16 +48,12 @@ export function Sidebar() {
             <div className={`h-16 flex items-center border-b border-base ${collapsed ? 'justify-center px-0' : 'px-5'}`}>
                 {!collapsed && (
                     <div className="flex items-center gap-3 animate-fade-in">
-                        <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
-                            <Menu size={18} className="text-white" />
-                        </div>
-                        <span className="font-bold text-main text-[16px] tracking-tight">GML Panel</span>
+                        <img src="/logo.png" alt="Logo" className="w-9 h-9 rounded-xl shadow-lg shadow-blue-600/20" />
+                        <span className="font-bold text-main text-[16px] tracking-tight">GML Tools Hub</span>
                     </div>
                 )}
                 {collapsed && (
-                    <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
-                        <Menu size={18} className="text-white" />
-                    </div>
+                    <img src="/logo.png" alt="Logo" className="w-9 h-9 rounded-xl shadow-lg shadow-blue-600/20" />
                 )}
             </div>
 
