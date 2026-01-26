@@ -181,7 +181,7 @@ export default function VMTADuplicate() {
                 {/* LEFT COLUMN - INPUTS */}
                 <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-2">
                     {/* Input Container */}
-                    <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden">
+                    <div className="flex-1 flex flex-col bg-white rounded-lg border border-slate-300 shadow-none overflow-hidden">
 
                         {/* Tab Headers */}
                         <div className="flex border-b border-base">
@@ -300,7 +300,7 @@ export default function VMTADuplicate() {
                 {/* RIGHT COLUMN - OUTPUT */}
                 <div className="flex-1 flex flex-col gap-6 overflow-hidden">
                     {/* Config Output */}
-                    <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden h-1/2">
+                    <div className="flex-1 flex flex-col bg-white rounded-lg border border-slate-300 shadow-none overflow-hidden h-1/2">
                         <div className="px-5 py-3 border-b border-base bg-base flex justify-between items-center">
                             <div className="flex items-center gap-2">
                                 <FileText size={14} className="text-secondary" />
@@ -324,7 +324,7 @@ export default function VMTADuplicate() {
 
                     {/* IP List Output (Only visible if active or content exists) */}
                     {(activeTab === 'manual' || ipResult) && (
-                        <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-lg border border-slate-300 dark:border-slate-700 shadow-none overflow-hidden h-1/2">
+                        <div className="flex-1 flex flex-col bg-white rounded-lg border border-slate-300 shadow-none overflow-hidden h-1/2">
                             <div className="px-5 py-3 border-b border-base bg-base flex justify-between items-center">
                                 <div className="flex items-center gap-2">
                                     <List size={14} className="text-secondary" />
