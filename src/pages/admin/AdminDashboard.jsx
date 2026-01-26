@@ -144,7 +144,7 @@ export default function AdminDashboard() {
                             placeholder="Search users..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            className="w-full pl-10 h-10 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 text-sm"
+                            className="w-full pl-10 h-10 bg-white [.dark_&]:bg-slate-900 border border-slate-300 [.dark_&]:border-slate-700 rounded-lg outline-none focus:border-blue-500 text-sm"
                         />
                     </div>
                 </div>

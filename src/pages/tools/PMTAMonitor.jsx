@@ -136,7 +136,7 @@ export default function PMTAMonitor() {
                             placeholder="Search sessions..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="h-10 pl-9 pr-4 w-[240px] bg-white border border-slate-300 rounded-xl text-sm 
+                            className="h-10 pl-9 pr-4 w-[240px] bg-white [.dark_&]:bg-slate-900 border border-slate-300 [.dark_&]:border-slate-700 rounded-xl text-sm 
                                 focus:ring-2 focus:ring-blue-500/20 text-main placeholder:text-muted
                                 transition-all"
                         />

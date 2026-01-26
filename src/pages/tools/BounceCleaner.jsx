@@ -208,7 +208,7 @@ export default function BounceCleaner() {
             {/* Content - DENSE LAYOUT, NO SCROLLING */}
             <div className="flex-1 overflow-hidden p-6 flex gap-6">
                 {/* Left Panel: Source */}
-                <div className="flex-1 flex flex-col bg-white rounded-lg border border-slate-300 shadow-none overflow-hidden">
+                <div className="flex-1 flex flex-col bg-white [.dark_&]:bg-slate-900 rounded-lg border border-slate-300 [.dark_&]:border-slate-700 shadow-none overflow-hidden">
                     <div className="px-4 py-3 border-b border-base bg-base flex justify-between items-center">
                         <label className="text-xs font-bold text-main flex items-center gap-2 uppercase tracking-wide">
                             <Globe size={14} className="text-secondary" />
@@ -232,7 +232,7 @@ export default function BounceCleaner() {
                 </div>
 
                 {/* Right Panel: Bounced Input */}
-                <div className="flex-1 flex flex-col bg-white rounded-lg border border-slate-300 shadow-none overflow-hidden relative">
+                <div className="flex-1 flex flex-col bg-white [.dark_&]:bg-slate-900 rounded-lg border border-slate-300 [.dark_&]:border-slate-700 shadow-none overflow-hidden relative">
                     <div className="px-4 py-3 border-b border-base bg-base flex justify-between items-center">
                         <label className="text-xs font-bold text-main flex items-center gap-2 uppercase tracking-wide">
                             <Shield size={14} className="text-secondary" />

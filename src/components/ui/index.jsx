@@ -184,9 +184,9 @@ export function Input({ label, error, className = '', ...props }) {
             )}
             <input
                 className={`
-                    w-full h-11 px-4 bg-white border rounded-lg text-sm text-[#1a1d21]
+                    w-full h-11 px-4 bg-white [.dark_&]:bg-slate-900 border rounded-lg text-sm text-[#1a1d21] [.dark_&]:text-white
                     placeholder:text-[#64748b]
-                    ${error ? 'border-[#ef4444]' : 'border-slate-300'}
+                    ${error ? 'border-[#ef4444]' : 'border-slate-300 [.dark_&]:border-slate-700'}
                 `}
                 {...props}
             />
@@ -206,9 +206,9 @@ export function Textarea({ label, error, className = '', ...props }) {
             )}
             <textarea
                 className={`
-                    w-full px-4 py-3 bg-white border rounded-lg text-sm text-[#1a1d21] resize-none
+                    w-full px-4 py-3 bg-white [.dark_&]:bg-slate-900 border rounded-lg text-sm text-[#1a1d21] [.dark_&]:text-white resize-none
                     placeholder:text-[#64748b]
-                    ${error ? 'border-[#ef4444]' : 'border-slate-300'}
+                    ${error ? 'border-[#ef4444]' : 'border-slate-300 [.dark_&]:border-slate-700'}
                 `}
                 {...props}
             />
