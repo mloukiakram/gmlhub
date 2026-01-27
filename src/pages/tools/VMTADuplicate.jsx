@@ -23,16 +23,53 @@ export default function VMTADuplicate() {
     const [ipResult, setIpResult] = useState(''); // Separate result for IP list
     const [copied, setCopied] = useState({ config: false, ip: false });
 
-    // Initial Load - Check local storage for mailer ID
+    // Unified Persistence: Load on mount
     useEffect(() => {
-        const savedId = localStorage.getItem('savedMailerId');
-        if (savedId) setManualForm(prev => ({ ...prev, mailerId: savedId }));
+        try {
+            // Try loading unified preferences first
+            const savedPrefs = localStorage.getItem('vmta_preferences');
+            if (savedPrefs) {
+                const parsed = JSON.parse(savedPrefs);
+                setManualForm(prev => ({
+                    ...prev,
+                    isp: parsed.isp || prev.isp,
+                    mailerId: parsed.mailerId || prev.mailerId,
+                    hostname: parsed.hostname || prev.hostname
+                }));
+                if (parsed.loopCount) setLoopCount(parsed.loopCount);
+                if (parsed.sequential !== undefined) setSequential(parsed.sequential);
+            } else {
+                // Fallback: Check for legacy single-item storage (original behavior migration)
+                const legacyMailerId = localStorage.getItem('savedMailerId');
+                if (legacyMailerId) {
+                    setManualForm(prev => ({ ...prev, mailerId: legacyMailerId }));
+                }
+            }
+        } catch (error) {
+            console.error("Failed to load VMTA preferences:", error);
+        }
     }, []);
 
-    // Save Mailer ID
+    // Unified Persistence: Save on any change (Auto-save)
+    useEffect(() => {
+        const prefs = {
+            isp: manualForm.isp,
+            mailerId: manualForm.mailerId,
+            hostname: manualForm.hostname,
+            loopCount: loopCount,
+            sequential: sequential
+        };
+        localStorage.setItem('vmta_preferences', JSON.stringify(prefs));
+
+        // Keep legacy key synced for now if needed, or we can consider it migrated. 
+        // We'll update it to maintain backward compat if the user checks 'save' specifically, 
+        // but here we are auto-saving everything.
+        localStorage.setItem('savedMailerId', manualForm.mailerId);
+    }, [manualForm.isp, manualForm.mailerId, manualForm.hostname, loopCount, sequential]);
+
+    // Handlers (Simplified, logic moved to useEffect)
     const handleMailerIdChange = (val) => {
         setManualForm(prev => ({ ...prev, mailerId: val }));
-        localStorage.setItem('savedMailerId', val);
     };
 
     const ISPs = [

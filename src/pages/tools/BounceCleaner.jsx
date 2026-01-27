@@ -256,11 +256,18 @@ export default function BounceCleaner() {
                     />
 
                     {/* Action Bar Overlay - Simpler */}
-                    <div className="absolute bottom-6 left-6 right-6">
+                    <div className="absolute bottom-6 left-6 right-6 flex gap-2">
+                         <Button
+                            variant="secondary"
+                            onClick={handlePreview}
+                            className="flex-1 shadow-sm"
+                        >
+                            Preview
+                        </Button>
                         <Button
                             icon={Trash2}
                             onClick={processDomains}
-                            className="w-full shadow-sm"
+                            className="flex-[2] shadow-sm"
                         >
                             Clean Domains & Save
                         </Button>
