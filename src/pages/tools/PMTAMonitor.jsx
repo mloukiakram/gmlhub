@@ -588,9 +588,9 @@ function IpsModal({ isOpen, onClose, session, token, showToast }) {
                     ))}
                 </div>
 
-                <div className="flex-1 overflow-hidden flex flex-col">
+                <div className="flex-1 overflow-hidden flex flex-col min-h-0">
                     {activeTab === 'list' ? (
-                        <div className="flex-1 flex flex-col">
+                        <div className="flex-1 flex flex-col min-h-0">
                             {/* Actions */}
                             <div className="flex items-center justify-between mb-4">
                                 <div className="text-sm text-slate-500 dark:text-slate-400">
