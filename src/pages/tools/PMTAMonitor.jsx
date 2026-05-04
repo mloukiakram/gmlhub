@@ -405,8 +405,9 @@ function SessionItem({ session, isExpanded, onToggleMonitor, onViewIps, onEdit, 
                                             <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
                                                 <button
                                                     onClick={() => {
-                                                        navigator.clipboard.writeText(ip.label || 'Server');
-                                                        showToast('Label copied', 'success');
+                                                        // Use backticks and \t for a tab space between the label and IP
+                                                        navigator.clipboard.writeText(`${ip.label || 'Server'}\t${ip.ip}`);
+                                                        showToast('Label & IP copied', 'success'); // Optional: Update the toast message too!
                                                     }}
                                                     className="text-xs font-bold text-slate-700 truncate max-w-[70%] hover:text-blue-600 transition-colors text-left"
                                                     title="Click to copy"
