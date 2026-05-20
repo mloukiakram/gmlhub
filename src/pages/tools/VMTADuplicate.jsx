@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../../components/ui';
-import { Copy, Check, Code, List, FileText } from 'lucide-react';
+import { Copy, Check, List, FileText } from 'lucide-react';
 
 export default function VMTADuplicate() {
     const [activeTab, setActiveTab] = useState('manual'); // Default to Manual
     const [loopCount, setLoopCount] = useState(1);
     const [sequential, setSequential] = useState(true);
     const [enableDkim, setEnableDkim] = useState(true);
+    const [useRHost, setUseRHost] = useState(false); // New R_host state
 
     // Config Mode State
     const [configInput, setConfigInput] = useState('');
@@ -22,13 +23,12 @@ export default function VMTADuplicate() {
 
     // Outputs
     const [result, setResult] = useState('');
-    const [ipResult, setIpResult] = useState(''); // Separate result for IP list
+    const [ipResult, setIpResult] = useState('');
     const [copied, setCopied] = useState({ config: false, ip: false });
 
     // Unified Persistence: Load on mount
     useEffect(() => {
         try {
-            // Try loading unified preferences first
             const savedPrefs = localStorage.getItem('vmta_preferences');
             if (savedPrefs) {
                 const parsed = JSON.parse(savedPrefs);
@@ -36,18 +36,16 @@ export default function VMTADuplicate() {
                     ...prev,
                     isp: parsed.isp || prev.isp,
                     mailerId: parsed.mailerId || prev.mailerId,
-                    globalHostName: parsed.globalHostName || parsed.hostname || prev.globalHostName, // fallback to old 'hostname' for compatibility
+                    globalHostName: parsed.globalHostName || parsed.hostname || prev.globalHostName,
                     dkimDomains: parsed.dkimDomains || prev.dkimDomains
                 }));
                 if (parsed.loopCount) setLoopCount(parsed.loopCount);
                 if (parsed.sequential !== undefined) setSequential(parsed.sequential);
                 if (parsed.enableDkim !== undefined) setEnableDkim(parsed.enableDkim);
+                if (parsed.useRHost !== undefined) setUseRHost(parsed.useRHost);
             } else {
-                // Fallback: Check for legacy single-item storage
                 const legacyMailerId = localStorage.getItem('savedMailerId');
-                if (legacyMailerId) {
-                    setManualForm(prev => ({ ...prev, mailerId: legacyMailerId }));
-                }
+                if (legacyMailerId) setManualForm(prev => ({ ...prev, mailerId: legacyMailerId }));
             }
         } catch (error) {
             console.error("Failed to load VMTA preferences:", error);
@@ -63,11 +61,19 @@ export default function VMTADuplicate() {
             dkimDomains: manualForm.dkimDomains,
             loopCount: loopCount,
             sequential: sequential,
-            enableDkim: enableDkim
+            enableDkim: enableDkim,
+            useRHost: useRHost
         };
         localStorage.setItem('vmta_preferences', JSON.stringify(prefs));
         localStorage.setItem('savedMailerId', manualForm.mailerId);
-    }, [manualForm, loopCount, sequential, enableDkim]);
+    }, [manualForm, loopCount, sequential, enableDkim, useRHost]);
+
+    // Automatically disable R_host if DKIM is turned off
+    useEffect(() => {
+        if (!enableDkim && useRHost) {
+            setUseRHost(false);
+        }
+    }, [enableDkim]);
 
     const handleMailerIdChange = (val) => {
         setManualForm(prev => ({ ...prev, mailerId: val }));
@@ -90,7 +96,6 @@ export default function VMTADuplicate() {
         let ipListOutput = "";
 
         if (activeTab === 'config') {
-            // MODE 1: Config Duplicator
             if (!configInput.trim()) {
                 alert("Please paste the Virtual-MTA configuration.");
                 return;
@@ -114,7 +119,6 @@ export default function VMTADuplicate() {
             }
 
         } else {
-            // MODE 2: Manual IP Generator with DKIM Cartesian Sync
             const { isp, mailerId, globalHostName, ipList, dkimDomains } = manualForm;
             const lines = ipList.split('\n').filter(l => l.trim());
             const dkimLines = dkimDomains.split('\n').filter(l => l.trim());
@@ -134,22 +138,15 @@ export default function VMTADuplicate() {
             let sequentialCounter = 1;
             let ipSequentialCounter = 1;
             
-            // If DKIM is disabled, we simulate an array of length 1 to ensure the loops still run
             let dkimArray = enableDkim && dkimLines.length > 0 ? dkimLines : [''];
 
             try {
-                // Loop 1: Overall repetitions (Loop Count)
                 for (let l = 1; l <= loopCount; l++) {
-                    
-                    // Loop 2: Cycle through each DKIM domain
                     for (let d = 0; d < dkimArray.length; d++) {
                         
                         let currentDkimDomain = dkimArray[d];
-                        
-                        // If non-sequential, generate a unique ID for this batch so names don't collide
                         let batchIndex = (l - 1) * dkimArray.length + d + 1;
 
-                        // Loop 3: Apply the current DKIM domain to ALL IPs in the list
                         lines.forEach(line => {
                             const parts = line.split(',');
                             const ip = parts[0]?.trim();
@@ -160,12 +157,17 @@ export default function VMTADuplicate() {
                                 throw new Error(`Invalid format in line: ${line}\nExpected format: IP,Domain,ID,...`);
                             }
 
-                            // Build Base vMTA Name
+                            // Base vMTA Name
                             let baseVmtaName = ip.includes(':') ? `ipv6-${id}-${isp}-${mailerId}` : `${ip}-${isp}-${mailerId}`;
                             let finalVmtaName = sequential ? `${baseVmtaName}-${sequentialCounter++}` : `${baseVmtaName}-${batchIndex}`;
 
-                            // Host Name logic (Global Input overrides List Domain)
-                            let activeHostName = globalHostName.trim() !== '' ? globalHostName.trim() : listDomain;
+                            // Host Name Logic (R_host Override)
+                            let activeHostName = '';
+                            if (useRHost && enableDkim && currentDkimDomain) {
+                                activeHostName = currentDkimDomain; // Force hostname to be DKIM domain
+                            } else {
+                                activeHostName = globalHostName.trim() !== '' ? globalHostName.trim() : listDomain;
+                            }
 
                             // DKIM Line logic
                             let dkimLineString = enableDkim ? `\n domain-key selector1,*,/etc/pmta/domainKeys/${currentDkimDomain}/serv.pem` : '';
@@ -205,7 +207,6 @@ export default function VMTADuplicate() {
 
     return (
         <div className="h-full flex flex-col bg-base transition-colors duration-300">
-            {/* Header */}
             <div className="px-6 py-4 border-b border-base bg-surface transition-colors flex items-center justify-between flex-shrink-0 shadow-none">
                 <div className="flex items-center gap-3">
                     <div>
@@ -220,10 +221,7 @@ export default function VMTADuplicate() {
             <div className="flex-1 overflow-hidden p-6 flex gap-6">
                 {/* LEFT COLUMN - INPUTS */}
                 <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-2">
-                    {/* Input Container */}
                     <div className="flex-1 flex flex-col bg-white [.dark_&]:bg-slate-900 rounded-lg border border-slate-300 [.dark_&]:border-slate-700 shadow-none overflow-hidden">
-
-                        {/* Tab Headers */}
                         <div className="flex border-b border-base">
                             <button
                                 onClick={() => { setActiveTab('manual'); setResult(''); setIpResult(''); }}
@@ -249,9 +247,6 @@ export default function VMTADuplicate() {
                                         placeholder={`<virtual-mta example-mta>\n smtp-source-ip 1.1.1.1\n host-name example.com\n</virtual-mta>`}
                                         className="w-full h-full p-4 bg-base border border-base rounded text-sm font-mono focus:outline-none resize-none placeholder:text-muted"
                                     />
-                                    <p className="text-[10px] text-muted mt-2">
-                                        Paste existing configuration to duplicate it.
-                                    </p>
                                 </div>
                             ) : (
                                 <div className="flex flex-col h-full p-4 space-y-4">
@@ -277,7 +272,9 @@ export default function VMTADuplicate() {
                                             />
                                         </div>
                                     </div>
-                                    <div>
+                                    
+                                    {/* Global Host Name with R_host styling override */}
+                                    <div className={`transition-opacity duration-300 ${useRHost ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
                                         <label className="flex items-center gap-2 text-xs font-bold text-secondary uppercase mb-1">
                                             Global Host Name
                                             <span className="text-[10px] bg-surface text-secondary px-1.5 py-0.5 rounded font-normal normal-case border border-base">Optional</span>
@@ -286,12 +283,13 @@ export default function VMTADuplicate() {
                                             type="text"
                                             value={manualForm.globalHostName}
                                             onChange={e => setManualForm({ ...manualForm, globalHostName: e.target.value })}
-                                            placeholder="Leave empty to use Domain from IP list"
+                                            placeholder={useRHost ? "Overridden by [R_host]" : "Leave empty to use Domain from IP list"}
                                             className="w-full h-9 px-3 bg-base border border-base rounded text-sm outline-none text-main placeholder:text-muted"
+                                            disabled={useRHost}
                                         />
                                     </div>
 
-                                    {/* Textareas Stacked Vertically */}
+                                    {/* Textareas */}
                                     <div className="flex-1 flex flex-col gap-4">
                                         <div className="flex-1 flex flex-col min-h-[120px]">
                                             <label className="block text-xs font-bold text-secondary uppercase mb-1">IP, Domain & ID List</label>
@@ -301,20 +299,16 @@ export default function VMTADuplicate() {
                                                 placeholder={`46.246.92.222,item.iggflavor.org,17385544,565046,R\n2a10:1fc0:9::2ce1:da1c,still.iggflavor.org,17385551,565046,R`}
                                                 className="w-full h-full p-3 bg-base border border-base rounded text-sm font-mono outline-none resize-none text-main whitespace-nowrap"
                                             />
-                                            <p className="text-[10px] text-muted mt-2">
-                                                Format required: <span className="text-[#2563eb]">IP, Domain, ID, Other...</span>
-                                            </p>
                                         </div>
                                         <div className={`flex-1 flex flex-col min-h-[120px] transition-opacity duration-300 ${enableDkim ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
                                             <label className="block text-xs font-bold text-secondary uppercase mb-1">DKIM Domains List (One per line)</label>
                                             <textarea
                                                 value={manualForm.dkimDomains}
                                                 onChange={(e) => setManualForm({ ...manualForm, dkimDomains: e.target.value })}
-                                                placeholder={`snuk.prig.intelparam.it.com\nflom.brip.ietmonth.eu.com\nzint.quab.fxtvcjx38t.com`}
+                                                placeholder={`snuk.prig.intelparam.it.com\nflom.brip.ietmonth.eu.com`}
                                                 className="w-full h-full p-3 bg-base border border-base rounded text-sm font-mono outline-none resize-none text-main whitespace-nowrap"
                                                 disabled={!enableDkim}
                                             />
-                                            <p className="text-[10px] text-muted mt-2">Pairs every DKIM domain with every IP</p>
                                         </div>
                                     </div>
                                 </div>
@@ -336,7 +330,7 @@ export default function VMTADuplicate() {
                                 />
                             </div>
                             <div className="flex-1">
-                                <label className="block text-xs font-bold text-secondary uppercase mb-2">Naming Format</label>
+                                <label className="block text-xs font-bold text-secondary uppercase mb-2">Naming</label>
                                 <div className="flex items-center gap-2 h-10">
                                     <label className="flex items-center cursor-pointer gap-2 select-none">
                                         <div className={`w-10 h-5 rounded-full p-1 transition-colors ${sequential ? 'bg-[#2563eb]' : 'bg-slate-300 dark:bg-slate-700'}`} onClick={() => setSequential(!sequential)}>
@@ -348,21 +342,42 @@ export default function VMTADuplicate() {
                                     </label>
                                 </div>
                             </div>
+                            
                             {activeTab === 'manual' && (
-                                <div className="flex-1">
-                                    <label className="block text-xs font-bold text-secondary uppercase mb-2">DKIM Signature</label>
-                                    <div className="flex items-center gap-2 h-10">
-                                        <label className="flex items-center cursor-pointer gap-2 select-none">
-                                            <div className={`w-10 h-5 rounded-full p-1 transition-colors ${enableDkim ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-700'}`} onClick={() => setEnableDkim(!enableDkim)}>
-                                                <div className={`w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${enableDkim ? 'translate-x-5' : 'translate-x-0'}`} />
-                                            </div>
-                                            <span className="text-sm font-medium text-main">
-                                                {enableDkim ? 'Enabled' : 'Disabled'}
-                                            </span>
-                                        </label>
+                                <div className="flex-[1.5] flex gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-secondary uppercase mb-2">DKIM Signature</label>
+                                        <div className="flex items-center gap-2 h-10">
+                                            <label className="flex items-center cursor-pointer gap-2 select-none">
+                                                <div className={`w-10 h-5 rounded-full p-1 transition-colors ${enableDkim ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-700'}`} onClick={() => setEnableDkim(!enableDkim)}>
+                                                    <div className={`w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${enableDkim ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                </div>
+                                                <span className="text-sm font-medium text-main">
+                                                    {enableDkim ? 'Enabled' : 'Disabled'}
+                                                </span>
+                                            </label>
+                                        </div>
                                     </div>
+
+                                    {/* New R_host Toggle (Only visible if DKIM is enabled) */}
+                                    {enableDkim && (
+                                        <div className="animate-in fade-in zoom-in duration-200">
+                                            <label className="block text-xs font-bold text-purple-600 dark:text-purple-400 uppercase mb-2">[R_host] Sync</label>
+                                            <div className="flex items-center gap-2 h-10">
+                                                <label className="flex items-center cursor-pointer gap-2 select-none">
+                                                    <div className={`w-10 h-5 rounded-full p-1 transition-colors ${useRHost ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-700'}`} onClick={() => setUseRHost(!useRHost)}>
+                                                        <div className={`w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${useRHost ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                    </div>
+                                                    <span className="text-sm font-medium text-main">
+                                                        {useRHost ? 'Active' : 'Off'}
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
+
                             <Button size="lg" onClick={generate} className="h-10 px-8">
                                 Generate
                             </Button>
@@ -372,7 +387,6 @@ export default function VMTADuplicate() {
 
                 {/* RIGHT COLUMN - OUTPUT */}
                 <div className="flex-1 flex flex-col gap-6 overflow-hidden">
-                    {/* Config Output */}
                     <div className="flex-1 flex flex-col bg-white [.dark_&]:bg-slate-900 rounded-lg border border-slate-300 [.dark_&]:border-slate-700 shadow-none overflow-hidden h-1/2">
                         <div className="px-5 py-3 border-b border-base bg-base flex justify-between items-center">
                             <div className="flex items-center gap-2">
@@ -382,7 +396,6 @@ export default function VMTADuplicate() {
                             <button
                                 onClick={() => copyToClipboard(result, 'config')}
                                 className={`p-1.5 rounded-md transition-all ${copied.config ? 'bg-green-100 text-green-600 dark:bg-green-900/30' : 'bg-base hover:bg-surface-hover text-secondary'}`}
-                                title="Copy Content"
                             >
                                 {copied.config ? <Check size={16} /> : <Copy size={16} />}
                             </button>
@@ -395,7 +408,6 @@ export default function VMTADuplicate() {
                         />
                     </div>
 
-                    {/* IP List Output */}
                     {(activeTab === 'manual' || ipResult) && (
                         <div className="flex-1 flex flex-col bg-white [.dark_&]:bg-slate-900 rounded-lg border border-slate-300 [.dark_&]:border-slate-700 shadow-none overflow-hidden h-1/2">
                             <div className="px-5 py-3 border-b border-base bg-base flex justify-between items-center">
@@ -406,7 +418,6 @@ export default function VMTADuplicate() {
                                 <button
                                     onClick={() => copyToClipboard(ipResult, 'ip')}
                                     className={`p-1.5 rounded-md transition-all ${copied.ip ? 'bg-green-100 text-green-600 dark:bg-green-900/30' : 'bg-base hover:bg-surface-hover text-secondary'}`}
-                                    title="Copy Content"
                                 >
                                     {copied.ip ? <Check size={16} /> : <Copy size={16} />}
                                 </button>
