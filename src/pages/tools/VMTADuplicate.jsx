@@ -5,7 +5,8 @@ import { Copy, Check, Code, List, FileText } from 'lucide-react';
 export default function VMTADuplicate() {
     const [activeTab, setActiveTab] = useState('manual'); // Default to Manual
     const [loopCount, setLoopCount] = useState(1);
-    const [sequential, setSequential] = useState(false);
+    const [sequential, setSequential] = useState(true);
+    const [enableDkim, setEnableDkim] = useState(true);
 
     // Config Mode State
     const [configInput, setConfigInput] = useState('');
@@ -14,8 +15,9 @@ export default function VMTADuplicate() {
     const [manualForm, setManualForm] = useState({
         isp: 'gmail',
         mailerId: '',
-        hostname: '',
-        ipList: ''
+        globalHostName: '',
+        ipList: '',
+        dkimDomains: ''
     });
 
     // Outputs
@@ -34,12 +36,14 @@ export default function VMTADuplicate() {
                     ...prev,
                     isp: parsed.isp || prev.isp,
                     mailerId: parsed.mailerId || prev.mailerId,
-                    hostname: parsed.hostname || prev.hostname
+                    globalHostName: parsed.globalHostName || parsed.hostname || prev.globalHostName, // fallback to old 'hostname' for compatibility
+                    dkimDomains: parsed.dkimDomains || prev.dkimDomains
                 }));
                 if (parsed.loopCount) setLoopCount(parsed.loopCount);
                 if (parsed.sequential !== undefined) setSequential(parsed.sequential);
+                if (parsed.enableDkim !== undefined) setEnableDkim(parsed.enableDkim);
             } else {
-                // Fallback: Check for legacy single-item storage (original behavior migration)
+                // Fallback: Check for legacy single-item storage
                 const legacyMailerId = localStorage.getItem('savedMailerId');
                 if (legacyMailerId) {
                     setManualForm(prev => ({ ...prev, mailerId: legacyMailerId }));
@@ -55,19 +59,16 @@ export default function VMTADuplicate() {
         const prefs = {
             isp: manualForm.isp,
             mailerId: manualForm.mailerId,
-            hostname: manualForm.hostname,
+            globalHostName: manualForm.globalHostName,
+            dkimDomains: manualForm.dkimDomains,
             loopCount: loopCount,
-            sequential: sequential
+            sequential: sequential,
+            enableDkim: enableDkim
         };
         localStorage.setItem('vmta_preferences', JSON.stringify(prefs));
-
-        // Keep legacy key synced for now if needed, or we can consider it migrated. 
-        // We'll update it to maintain backward compat if the user checks 'save' specifically, 
-        // but here we are auto-saving everything.
         localStorage.setItem('savedMailerId', manualForm.mailerId);
-    }, [manualForm.isp, manualForm.mailerId, manualForm.hostname, loopCount, sequential]);
+    }, [manualForm, loopCount, sequential, enableDkim]);
 
-    // Handlers (Simplified, logic moved to useEffect)
     const handleMailerIdChange = (val) => {
         setManualForm(prev => ({ ...prev, mailerId: val }));
     };
@@ -113,80 +114,82 @@ export default function VMTADuplicate() {
             }
 
         } else {
-            // MODE 2: Manual IP Generator
-            const { isp, mailerId, hostname, ipList } = manualForm;
+            // MODE 2: Manual IP Generator with DKIM Cartesian Sync
+            const { isp, mailerId, globalHostName, ipList, dkimDomains } = manualForm;
             const lines = ipList.split('\n').filter(l => l.trim());
+            const dkimLines = dkimDomains.split('\n').filter(l => l.trim());
 
-            if (!lines.length || !isp || !mailerId || !hostname) {
-                alert("Please fill all fields and provide IP list.");
+            if (!lines.length || !isp || !mailerId) {
+                alert("Please fill ISP, Mailer ID, and provide the IP list.");
+                return;
+            }
+            if (enableDkim && !dkimLines.length) {
+                alert("DKIM is enabled, but the DKIM Domains list is empty.");
                 return;
             }
 
-            // Step 1: Generate Base Configs from IPs
-            let baseConfigs = [];
-            try {
-                baseConfigs = lines.map(line => {
-                    const parts = line.split(',');
-                    const ip = parts[0].trim();
-                    if (!ip) throw new Error("Invalid IP format in line: " + line);
+            let outputConfigs = [];
+            let allModifiedIpLines = [];
+            
+            let sequentialCounter = 1;
+            let ipSequentialCounter = 1;
+            
+            // If DKIM is disabled, we simulate an array of length 1 to ensure the loops still run
+            let dkimArray = enableDkim && dkimLines.length > 0 ? dkimLines : [''];
 
-                    if (ip.includes(':')) {
-                        // IPv6
-                        if (parts.length < 3 || !parts[2]) {
-                            throw new Error(`IPv6 ${ip} missing ID (IP,Domain,ID)`);
-                        }
-                        const id = parts[2].trim();
-                        return `<virtual-mta ipv6-${id}-${isp}-${mailerId}>\n smtp-source-ip ${ip}\n host-name ${hostname}\n</virtual-mta>`;
-                    } else {
-                        // IPv4
-                        return `<virtual-mta ${ip}-${isp}-${mailerId}>\n smtp-source-ip ${ip}\n host-name ${hostname}\n</virtual-mta>`;
+            try {
+                // Loop 1: Overall repetitions (Loop Count)
+                for (let l = 1; l <= loopCount; l++) {
+                    
+                    // Loop 2: Cycle through each DKIM domain
+                    for (let d = 0; d < dkimArray.length; d++) {
+                        
+                        let currentDkimDomain = dkimArray[d];
+                        
+                        // If non-sequential, generate a unique ID for this batch so names don't collide
+                        let batchIndex = (l - 1) * dkimArray.length + d + 1;
+
+                        // Loop 3: Apply the current DKIM domain to ALL IPs in the list
+                        lines.forEach(line => {
+                            const parts = line.split(',');
+                            const ip = parts[0]?.trim();
+                            const listDomain = parts[1]?.trim();
+                            const id = parts[2]?.trim();
+
+                            if (!ip || !listDomain || !id) {
+                                throw new Error(`Invalid format in line: ${line}\nExpected format: IP,Domain,ID,...`);
+                            }
+
+                            // Build Base vMTA Name
+                            let baseVmtaName = ip.includes(':') ? `ipv6-${id}-${isp}-${mailerId}` : `${ip}-${isp}-${mailerId}`;
+                            let finalVmtaName = sequential ? `${baseVmtaName}-${sequentialCounter++}` : `${baseVmtaName}-${batchIndex}`;
+
+                            // Host Name logic (Global Input overrides List Domain)
+                            let activeHostName = globalHostName.trim() !== '' ? globalHostName.trim() : listDomain;
+
+                            // DKIM Line logic
+                            let dkimLineString = enableDkim ? `\n domain-key selector1,*,/etc/pmta/domainKeys/${currentDkimDomain}/serv.pem` : '';
+
+                            // Construct Config Block
+                            let configBlock = `<virtual-mta ${finalVmtaName}>\n smtp-source-ip ${ip}\n host-name ${activeHostName}${dkimLineString}\n</virtual-mta>`;
+                            outputConfigs.push(configBlock);
+
+                            // Construct IP List Output
+                            if (sequential) {
+                                allModifiedIpLines.push(`${line.trim()},${isp}-${ipSequentialCounter++}`);
+                            } else {
+                                allModifiedIpLines.push(`${line.trim()},${isp}-${batchIndex}`);
+                            }
+                        });
                     }
-                });
+                }
             } catch (err) {
                 alert(err.message);
                 return;
             }
 
-            const baseText = baseConfigs.join('\n');
-            const vMtaRegex = /<virtual-mta\s+([\w\.\-]+)>/g;
-            let sequentialCounter = 1;
-            let ipSequentialCounter = 1;
-
-            // Step 2: Loop duplication
-            for (let i = 1; i <= loopCount; i++) {
-                // Config
-                if (sequential) {
-                    const modified = baseText.replace(vMtaRegex, (match, p1) => {
-                        const newName = `<virtual-mta ${p1}-${sequentialCounter}>`;
-                        sequentialCounter++;
-                        return newName;
-                    });
-                    output += modified + (i < loopCount ? '\n\n' : '');
-                } else {
-                    const modified = baseText.replace(vMtaRegex, `<virtual-mta $1-${i}>`);
-                    output += modified + (i < loopCount ? '\n\n' : '');
-                }
-            }
-
-            // Step 3: IP List Output Generation (Only for Manual Mode)
-            let allModifiedIpLines = [];
-            if (sequential) {
-                for (let i = 1; i <= loopCount; i++) {
-                    const modifiedLines = lines.map(line => {
-                        const modifiedLine = `${line.trim()},${isp}-${ipSequentialCounter}`;
-                        ipSequentialCounter++;
-                        return modifiedLine;
-                    });
-                    allModifiedIpLines.push(...modifiedLines);
-                }
-                ipListOutput = allModifiedIpLines.join('\n');
-            } else {
-                for (let i = 1; i <= loopCount; i++) {
-                    const modifiedLines = lines.map(line => `${line.trim()},${isp}-${i}`);
-                    allModifiedIpLines.push(modifiedLines.join('\n'));
-                }
-                ipListOutput = allModifiedIpLines.join('\n\n');
-            }
+            output = outputConfigs.join('\n\n');
+            ipListOutput = allModifiedIpLines.join('\n');
         }
 
         setResult(output);
@@ -275,26 +278,44 @@ export default function VMTADuplicate() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-secondary uppercase mb-1">Host Name</label>
+                                        <label className="flex items-center gap-2 text-xs font-bold text-secondary uppercase mb-1">
+                                            Global Host Name
+                                            <span className="text-[10px] bg-surface text-secondary px-1.5 py-0.5 rounded font-normal normal-case border border-base">Optional</span>
+                                        </label>
                                         <input
                                             type="text"
-                                            value={manualForm.hostname}
-                                            onChange={e => setManualForm({ ...manualForm, hostname: e.target.value })}
-                                            placeholder="e.g. ulm.edu"
-                                            className="w-full h-9 px-3 bg-base border border-base rounded text-sm outline-none text-main"
+                                            value={manualForm.globalHostName}
+                                            onChange={e => setManualForm({ ...manualForm, globalHostName: e.target.value })}
+                                            placeholder="Leave empty to use Domain from IP list"
+                                            className="w-full h-9 px-3 bg-base border border-base rounded text-sm outline-none text-main placeholder:text-muted"
                                         />
                                     </div>
-                                    <div className="flex-1 flex flex-col">
-                                        <label className="block text-xs font-bold text-secondary uppercase mb-1">IP & Domain List</label>
-                                        <textarea
-                                            value={manualForm.ipList}
-                                            onChange={(e) => setManualForm({ ...manualForm, ipList: e.target.value })}
-                                            placeholder={`1.1.1.1\nOR\nIPv6,Domain,ID`}
-                                            className="w-full h-full p-3 bg-base border border-base rounded text-sm font-mono outline-none resize-none text-main"
-                                        />
-                                        <p className="text-[10px] text-muted mt-2">
-                                            One IP per line. For IPv6, use: IP,Domain,ID
-                                        </p>
+
+                                    {/* Textareas Stacked Vertically */}
+                                    <div className="flex-1 flex flex-col gap-4">
+                                        <div className="flex-1 flex flex-col min-h-[120px]">
+                                            <label className="block text-xs font-bold text-secondary uppercase mb-1">IP, Domain & ID List</label>
+                                            <textarea
+                                                value={manualForm.ipList}
+                                                onChange={(e) => setManualForm({ ...manualForm, ipList: e.target.value })}
+                                                placeholder={`46.246.92.222,item.iggflavor.org,17385544,565046,R\n2a10:1fc0:9::2ce1:da1c,still.iggflavor.org,17385551,565046,R`}
+                                                className="w-full h-full p-3 bg-base border border-base rounded text-sm font-mono outline-none resize-none text-main whitespace-nowrap"
+                                            />
+                                            <p className="text-[10px] text-muted mt-2">
+                                                Format required: <span className="text-[#2563eb]">IP, Domain, ID, Other...</span>
+                                            </p>
+                                        </div>
+                                        <div className={`flex-1 flex flex-col min-h-[120px] transition-opacity duration-300 ${enableDkim ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+                                            <label className="block text-xs font-bold text-secondary uppercase mb-1">DKIM Domains List (One per line)</label>
+                                            <textarea
+                                                value={manualForm.dkimDomains}
+                                                onChange={(e) => setManualForm({ ...manualForm, dkimDomains: e.target.value })}
+                                                placeholder={`snuk.prig.intelparam.it.com\nflom.brip.ietmonth.eu.com\nzint.quab.fxtvcjx38t.com`}
+                                                className="w-full h-full p-3 bg-base border border-base rounded text-sm font-mono outline-none resize-none text-main whitespace-nowrap"
+                                                disabled={!enableDkim}
+                                            />
+                                            <p className="text-[10px] text-muted mt-2">Pairs every DKIM domain with every IP</p>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -311,14 +332,14 @@ export default function VMTADuplicate() {
                                     min="1"
                                     value={loopCount}
                                     onChange={(e) => setLoopCount(parseInt(e.target.value) || 1)}
-                                    className="w-full h-10 px-3 bg-base border border-base rounded font-bold outline-none focus:border-blue-500 text-main"
+                                    className="w-full h-10 px-3 bg-base border border-base rounded font-bold outline-none focus:border-[#2563eb] text-main"
                                 />
                             </div>
                             <div className="flex-1">
                                 <label className="block text-xs font-bold text-secondary uppercase mb-2">Naming Format</label>
                                 <div className="flex items-center gap-2 h-10">
                                     <label className="flex items-center cursor-pointer gap-2 select-none">
-                                        <div className={`w-10 h-5 rounded-full p-1 transition-colors ${sequential ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`} onClick={() => setSequential(!sequential)}>
+                                        <div className={`w-10 h-5 rounded-full p-1 transition-colors ${sequential ? 'bg-[#2563eb]' : 'bg-slate-300 dark:bg-slate-700'}`} onClick={() => setSequential(!sequential)}>
                                             <div className={`w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${sequential ? 'translate-x-5' : 'translate-x-0'}`} />
                                         </div>
                                         <span className="text-sm font-medium text-main">
@@ -327,6 +348,21 @@ export default function VMTADuplicate() {
                                     </label>
                                 </div>
                             </div>
+                            {activeTab === 'manual' && (
+                                <div className="flex-1">
+                                    <label className="block text-xs font-bold text-secondary uppercase mb-2">DKIM Signature</label>
+                                    <div className="flex items-center gap-2 h-10">
+                                        <label className="flex items-center cursor-pointer gap-2 select-none">
+                                            <div className={`w-10 h-5 rounded-full p-1 transition-colors ${enableDkim ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-700'}`} onClick={() => setEnableDkim(!enableDkim)}>
+                                                <div className={`w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${enableDkim ? 'translate-x-5' : 'translate-x-0'}`} />
+                                            </div>
+                                            <span className="text-sm font-medium text-main">
+                                                {enableDkim ? 'Enabled' : 'Disabled'}
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
                             <Button size="lg" onClick={generate} className="h-10 px-8">
                                 Generate
                             </Button>
@@ -359,7 +395,7 @@ export default function VMTADuplicate() {
                         />
                     </div>
 
-                    {/* IP List Output (Only visible if active or content exists) */}
+                    {/* IP List Output */}
                     {(activeTab === 'manual' || ipResult) && (
                         <div className="flex-1 flex flex-col bg-white [.dark_&]:bg-slate-900 rounded-lg border border-slate-300 [.dark_&]:border-slate-700 shadow-none overflow-hidden h-1/2">
                             <div className="px-5 py-3 border-b border-base bg-base flex justify-between items-center">
@@ -379,7 +415,7 @@ export default function VMTADuplicate() {
                                 value={ipResult}
                                 readOnly
                                 placeholder="Generated IP list entries..."
-                                className="flex-1 w-full p-5 bg-base text-main text-sm font-mono resize-none focus:outline-none"
+                                className="flex-1 w-full p-5 bg-base text-main text-sm font-mono resize-none focus:outline-none whitespace-nowrap"
                             />
                         </div>
                     )}
