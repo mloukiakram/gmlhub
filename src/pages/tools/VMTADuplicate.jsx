@@ -68,7 +68,7 @@ export default function VMTADuplicate() {
         localStorage.setItem('savedMailerId', manualForm.mailerId);
     }, [manualForm, loopCount, sequential, enableDkim, useRHost]);
 
-    // Automatically disable  if DKIM is turned off
+    // Automatically disable R_host if DKIM is turned off
     useEffect(() => {
         if (!enableDkim && useRHost) {
             setUseRHost(false);
@@ -362,7 +362,7 @@ export default function VMTADuplicate() {
                                     {/* New R_host Toggle (Only visible if DKIM is enabled) */}
                                     {enableDkim && (
                                         <div className="animate-in fade-in zoom-in duration-200">
-                                            <label className="block text-xs font-bold text-purple-600 dark:text-purple-400 uppercase mb-2">[R_host]</label>
+                                            <label className="block text-xs font-bold text-purple-600 dark:text-purple-400 uppercase mb-2">[R_host] Sync</label>
                                             <div className="flex items-center gap-2 h-10">
                                                 <label className="flex items-center cursor-pointer gap-2 select-none">
                                                     <div className={`w-10 h-5 rounded-full p-1 transition-colors ${useRHost ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-700'}`} onClick={() => setUseRHost(!useRHost)}>
