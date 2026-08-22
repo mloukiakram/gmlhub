@@ -3,17 +3,18 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import {
-    Copy,
-    Sparkles,
-    Trash2,
-    Monitor,
-    HardDrive,
-    ChevronLeft,
-    ChevronRight,
-    LogOut,
-    Menu,
-    Sun,
-    Moon
+  Copy,
+  Sparkles,
+  Trash2,
+  Monitor,
+  HardDrive,
+  ChevronLeft,
+  ChevronRight,
+  LogOut,
+  Menu,
+  Sun,
+  Moon,
+  Globe
 } from 'lucide-react';
 
 const navItems = [
