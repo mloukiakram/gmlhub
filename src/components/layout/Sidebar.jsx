@@ -21,7 +21,7 @@ const navItems = [
     { path: 'aura-remover', label: 'Lines Processor', icon: Sparkles },
     { path: 'bounce-cleaner', label: 'Bounce Cleaner', icon: Trash2 },
     { path: 'pmta-monitor', label: 'PMTA Monitor', icon: Monitor },
-    { path: 'rdns-generator', label: 'rDNS Generator', icon: Globe }
+    { path: 'rdns-generator', label: 'rDNS Generator', icon: Globe },
     { path: 'bucket-tool', label: 'Bucket Tool', icon: HardDrive },
 ];
 
