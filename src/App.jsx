@@ -9,6 +9,7 @@ import PMTAMonitor from './pages/tools/PMTAMonitor';
 import VMTADuplicate from './pages/tools/VMTADuplicate';
 import AuraRemover from './pages/tools/AuraRemover';
 import BounceCleaner from './pages/tools/BounceCleaner';
+import RDNSGenerator from './pages/tools/RDNSGenerator';
 import BucketTool from './pages/tools/BucketTool';
 
 function ProtectedRoute({ children }) {
@@ -59,6 +60,7 @@ function AppRoutes() {
         <Route path="aura-remover" element={<AuraRemover />} />
         <Route path="bounce-cleaner" element={<BounceCleaner />} />
         <Route path="bucket-tool" element={<BucketTool />} />
+        <Route path="/tools/rdns-generator" element={<RDNSGenerator />} />
       </Route>
 
       <Route path="/" element={<Navigate to="/tools/vmta-duplicate" replace />} />
