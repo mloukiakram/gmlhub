@@ -62,8 +62,8 @@ export default function AuraRemover() {
         const cleanedText = rawText.replace(/,/g, '\n');
         const lines = cleanedText.split('\n');
         const parsedData = [];
-        // Matches IPv4 or an alphanumeric/colon prefix (like "ipv6" or an actual IPv6 address)
-        const vmtaRegex = /^(?:\d+(?:\.\d+){3}|[a-zA-Z0-9:]+)-([a-zA-Z0-9]+)-.*-(\d+)$/;
+        // Matches IP-VMTA-DOMAIN-LINE where IP is IPv4 or IPv6 (with colons). If no IP, matches ipv6-ID as the VMTA.
+        const vmtaRegex = /^(?:(?:\d+(?:\.\d+){3}|[a-fA-F0-9]*:[a-fA-F0-9:]+)-)?(ipv6-[a-zA-Z0-9]+|[a-zA-Z0-9_]+)-.*-(\d+)$/i;
 
         lines.forEach(line => {
             const trimmed = line.trim();
