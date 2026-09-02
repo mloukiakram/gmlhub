@@ -11,6 +11,7 @@ import AuraRemover from './pages/tools/AuraRemover';
 import BounceCleaner from './pages/tools/BounceCleaner';
 import RDNSGenerator from './pages/tools/RDNSGenerator';
 import BucketTool from './pages/tools/BucketTool';
+import MacroBouncer from './pages/tools/MacroBouncer';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -59,6 +60,7 @@ function AppRoutes() {
         <Route path="vmta-duplicate" element={<VMTADuplicate />} />
         <Route path="aura-remover" element={<AuraRemover />} />
         <Route path="bounce-cleaner" element={<BounceCleaner />} />
+        <Route path="macro-bouncer" element={<MacroBouncer />} />
         <Route path="bucket-tool" element={<BucketTool />} />
         <Route path="/tools/rdns-generator" element={<RDNSGenerator />} />
       </Route>
