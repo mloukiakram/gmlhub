@@ -39,18 +39,18 @@ export default function MacroBouncer() {
             const res = await fetch(`${API_BASE}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const data = await res.json();
+            const result = await res.json();
             
-            if (res.ok && data.teams) {
-                setTeams(data.teams);
-                const teamKeys = Object.keys(data.teams);
+            if (res.ok && result.success && result.data && result.data.teams) {
+                setTeams(result.data.teams);
+                const teamKeys = Object.keys(result.data.teams);
                 if (teamKeys.length > 0 && !teamKeys.includes(currentTeam)) {
                     setCurrentTeam(teamKeys[0]);
                 }
-                const total = Object.values(data.teams).reduce((sum, arr) => sum + arr.length, 0);
+                const total = Object.values(result.data.teams).reduce((sum, arr) => sum + arr.length, 0);
                 showToast(`Loaded ${total} IPs across ${teamKeys.length} teams`, 'success');
             } else {
-                showToast(data.error || 'Failed to load IPs', 'error');
+                showToast(result.message || 'Failed to load IPs', 'error');
             }
         } catch (err) {
             showToast('Network error while loading IPs', 'error');
@@ -81,12 +81,12 @@ export default function MacroBouncer() {
                 },
                 body: JSON.stringify({ team: currentTeam, ips })
             });
-            const data = await res.json();
+            const result = await res.json();
             
-            if (res.ok) {
-                showToast(`Saved ${data.count} IPs for ${currentTeam}`, 'success');
+            if (res.ok && result.success) {
+                showToast(result.message || `Saved IPs for ${currentTeam}`, 'success');
             } else {
-                showToast(data.error || 'Failed to save IPs', 'error');
+                showToast(result.message || 'Failed to save IPs', 'error');
             }
         } catch (err) {
             showToast('Network error while saving IPs', 'error');
