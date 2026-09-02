@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Card, Button, Modal, ConfirmModal, Badge, Tooltip } from '../../components/ui';
 import {
-    Server, Save, Download, Plus, Trash2, Copy, Check, RefreshCw, Shield
+    Server, Save, Download, Plus, Trash2, Copy, Check, RefreshCw
 } from 'lucide-react';
 
 const API_BASE = '/.netlify/functions/macro-bouncer';
@@ -189,8 +189,7 @@ export default function MacroBouncer() {
                 <div className="flex items-center gap-3">
                     <div>
                         <h1 className="text-lg font-bold text-main tracking-tight flex items-center gap-2">
-                            <Shield className="text-blue-500" size={20} />
-                            Macro Bouncer
+                            Macro SPF changer
                         </h1>
                         <p className="text-xs text-secondary font-medium">
                             Manage AUTHORIZED_IPS in the remote Python server
