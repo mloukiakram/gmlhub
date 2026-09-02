@@ -70,9 +70,36 @@ export const handler = async (event) => {
             return sendResponse(200, { teams }, true, 'Loaded IPs');
         }
 
-        // ---------------- POST: Save IPs ----------------
+        // ---------------- POST: Save IPs or Restart ----------------
         if (event.httpMethod === 'POST') {
-            const { team, ips } = JSON.parse(event.body || '{}');
+            const body = JSON.parse(event.body || '{}');
+            
+            if (body.action === 'restart_pdns') {
+                return new Promise((resolve) => {
+                    // We use the underlying ssh2 client object exposed by ssh2-sftp-client
+                    sftp.client.exec('systemctl restart pdns', (err, stream) => {
+                        if (err) {
+                            sftp.end();
+                            return resolve(sendResponse(500, null, false, `Execution error: ${err.message}`));
+                        }
+                        let output = '';
+                        let errorOutput = '';
+                        stream.on('close', (code, signal) => {
+                            sftp.end();
+                            if (code !== 0) {
+                                return resolve(sendResponse(500, null, false, `Restart failed with code ${code}: ${errorOutput}`));
+                            }
+                            return resolve(sendResponse(200, { output }, true, 'PowerDNS restarted successfully'));
+                        }).on('data', (data) => {
+                            output += data;
+                        }).stderr.on('data', (data) => {
+                            errorOutput += data;
+                        });
+                    });
+                });
+            }
+
+            const { team, ips } = body;
             if (!team) {
                 await sftp.end();
                 return sendResponse(400, null, false, 'No team specified');

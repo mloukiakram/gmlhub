@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Card, Button, Modal, ConfirmModal, Badge, Tooltip } from '../../components/ui';
 import {
-    Server, Save, Download, Plus, Trash2, Copy, Check, RefreshCw
+    Server, Save, Download, Plus, Trash2, Copy, Check, RefreshCw, Power
 } from 'lucide-react';
 
 const API_BASE = '/.netlify/functions/macro-bouncer';
@@ -90,6 +90,33 @@ export default function MacroBouncer() {
             }
         } catch (err) {
             showToast('Network error while saving IPs', 'error');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const restartPDNS = async () => {
+        if (!window.confirm('Are you sure you want to restart PowerDNS (pdns) on the remote server?')) return;
+        
+        setSaving(true);
+        try {
+            const res = await fetch(`${API_BASE}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ action: 'restart_pdns' })
+            });
+            const result = await res.json();
+            
+            if (res.ok && result.success) {
+                showToast(result.message || 'PowerDNS restarted successfully', 'success');
+            } else {
+                showToast(result.message || 'Failed to restart PowerDNS', 'error');
+            }
+        } catch (err) {
+            showToast('Network error while restarting PowerDNS', 'error');
         } finally {
             setSaving(false);
         }
@@ -242,6 +269,17 @@ export default function MacroBouncer() {
                             <Tooltip content="Copy all IPs">
                                 <Button variant="outline" size="sm" icon={copied ? Check : Copy} onClick={copyAll} className="border-base" />
                             </Tooltip>
+                            
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                icon={Power}
+                                onClick={restartPDNS}
+                                disabled={saving}
+                                className={saving ? "opacity-70" : ""}
+                            >
+                                Restart PowerDNS
+                            </Button>
                             
                             <Button
                                 icon={Save}
